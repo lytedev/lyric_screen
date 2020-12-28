@@ -1,8 +1,7 @@
 defmodule LyricScreen.Web.UserSocket do
 	use Phoenix.Socket
 
-	## Channels
-	# channel "room:*", LyricScreen.Web.RoomChannel
+	channel "room:*", LyricScreen.Web.RoomChannel
 
 	# Socket params are passed from the client and can
 	# be used to verify and authenticate a user. After

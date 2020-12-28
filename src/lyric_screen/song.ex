@@ -60,18 +60,16 @@ defmodule LyricScreen.Song.File do
 	Contains functions managing song files.
 	"""
 
-	@songs_dir "src/priv/data/songs/"
-
 	alias LyricScreen.Song.Parser
 
 	defp song_file?(f) do
 		String.ends_with?(f, ".txt")
 	end
 
-	def default_dir, do: @songs_dir
+	def dir, do: Application.get_env(:lyric_screen, :songs_dir)
 
 	def ls do
-		case File.ls(@songs_dir) do
+		case File.ls(dir()) do
 			{:ok, files} ->
 				keys =
 					files
@@ -83,7 +81,7 @@ defmodule LyricScreen.Song.File do
 	end
 
 	def content(f) do
-		ff = Path.join(@songs_dir, f <> ".txt")
+		ff = Path.join(dir(), f <> ".txt")
 		case File.read(ff) do
 			{:ok, content} ->
 				clean_content =
@@ -181,6 +179,7 @@ defmodule LyricScreen.Song do
 		song
 		|> to_binary_stream
 		|> Stream.into(File.stream!(Path.join(F.default_dir(), key <> ".txt.new"), [:write, :utf8]))
+		|> Stream.run()
 		File.rename!(Path.join(F.default_dir(), key <> ".txt.new"), Path.join(F.default_dir(), key <> ".txt"))
 
 		:ok

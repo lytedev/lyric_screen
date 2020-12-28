@@ -20,7 +20,8 @@ defmodule LyricScreen.Web.Router do
 
 		get "/", PageController, :index
 		live "/clock", Live.Clock
-		live "/songs", Live.Songs
+		live "/dashboard", Live.Dashboard
+		get "/control-panel/display/:id", DisplayController, :show_control_panel
 	end
 
 	# Other scopes may use custom stacks.
@@ -38,7 +39,7 @@ defmodule LyricScreen.Web.Router do
 	if Mix.env() in [:dev, :test] do
 		import Phoenix.LiveDashboard.Router
 
-		scope "/" do
+		scope "/admin" do
 			pipe_through :browser
 			live_dashboard "/dashboard", metrics: LyricScreen.Web.Telemetry
 		end

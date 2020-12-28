@@ -4,7 +4,8 @@
 	--bg: #111;
 	--fg: #fff;
 	--lc: #c4f;
-	--f: Lato
+	--f: Lato;
+	--mf: Iosevka;
 }
 
 body {
@@ -13,6 +14,18 @@ body {
 	font-family: var(--f);
 }
 
+code, pre {
+	font-family: var(--mf);
+}
+
 a {
 	color: var(--lc);
+}
+
+li {
+	border-left: solid 5px transparent;
+}
+
+li.active {
+	border-left: solid 5px var(--lc);
 }

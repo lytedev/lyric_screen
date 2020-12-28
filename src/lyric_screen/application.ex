@@ -4,6 +4,9 @@ defmodule LyricScreen.Application do
 	use Application
 
 	def start(_type, _args) do
+		[:displays_dir, :playlists_dir, :songs_dir]
+		|> Enum.each(&(:ok = File.mkdir_p(Application.get_env(:lyric_screen, &1))))
+
 		children = [
 			LyricScreen.Web.Telemetry,
 			{Phoenix.PubSub, name: LyricScreen.PubSub},

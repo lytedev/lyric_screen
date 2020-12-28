@@ -1,5 +1,11 @@
 use Mix.Config
 
+config :lyric_screen,
+	chats_dir: "src/priv/data/chats",
+	playlists_dir: "src/priv/data/playlists",
+	displays_dir: "src/priv/data/displays",
+	songs_dir: "src/priv/data/songs"
+
 config :lyric_screen, LyricScreen.Web.Endpoint,
 	url: [host: "localhost"],
 	secret_key_base: "vqQv2ePi+neCxN9s7bwj508kWY06T7y4mijCyBrCz+xyXV/ozuHOMsSeNZ7OljJ9",
