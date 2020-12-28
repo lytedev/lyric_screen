@@ -20,6 +20,7 @@ defmodule LyricScreen.Web.Router do
 
     get "/", PageController, :index
     live "/clock", Live.Clock
+    live "/songs", Live.Songs
   end
 
   # Other scopes may use custom stacks.

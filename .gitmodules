@@ -1,0 +1,3 @@
+[submodule "src/priv/data/songs"]
+	path = src/priv/data/songs
+	url = git@gitlab.com:Rising-Church/rising-lyrics-data.git
