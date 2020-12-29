@@ -7,8 +7,8 @@ defmodule LyricScreen.ParserHelpers do
 
 	@ascii_newline 10
 
-	def s(c \\ empty()), do: ascii_char([?\s, ?\t])
-	def ws(c \\ empty()), do: ascii_char([?\s, ?\n, ?\t, ?\r])
+	def s(c \\ empty()), do: c |> ascii_char([?\s, ?\t])
+	def ws(c \\ empty()), do: c |> ascii_char([?\s, ?\n, ?\t, ?\r])
 	def eol(c \\ empty()), do: choice(c, [string("\r\n"), string("\n")])
 	def eosl(c \\ empty()), do: choice(c, [eol(), eos()])
 
@@ -28,15 +28,15 @@ defmodule LyricScreen.ParserHelpers do
 	def non_empty_line_chunk(c \\ empty()) do
 		c
 		|> times(non_empty_line(), min: 1)
-		|> wrap()
 		|> label("non-empty linechunk")
 	end
 
 	def trimmed_non_empty_line(c \\ empty()) do
 		c
 		|> ignore(repeat(s()))
-		|> non_empty_line()
+		|> ascii_string([not: @ascii_newline], min: 1)
 		|> ignore(repeat(s()))
+		|> ignore(eosl())
 		|> label("trimmed non-empty line")
 	end
 

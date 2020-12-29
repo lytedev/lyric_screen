@@ -93,6 +93,7 @@ defmodule LyricScreen.SongParserTest do
 			song_contents =
 				"""
 				The Title
+				meta: data
 
 				Bare
 				More Bare
@@ -108,6 +109,7 @@ defmodule LyricScreen.SongParserTest do
 				append = nl |> Stream.take(i) |> Enum.join()
 				assert_parser_raw_data_results(song_contents <> append, {:ok, [
 					title: "The Title",
+					metadata: [meta_named: ["meta", "data"]],
 					verses: [
 						{:bare_verse, ["Bare", "More Bare"]},
 						{:verse_ref, "Verse 1"},

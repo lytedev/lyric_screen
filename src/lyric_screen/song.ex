@@ -39,6 +39,7 @@ defmodule LyricScreen.Song.Parser do
 		ignore(ascii_char([@verse_ref_pref]))
 		|> ascii_string([not: @verse_ref_suff, not: @ascii_newline], min: 1)
 		|> ignore(ascii_char([@verse_ref_suff]))
+		|> ignore(eol())
 		|> unwrap_and_tag(:verse_ref)
 
 	bare_verse = trimmed_non_empty_line_chunk() |> unwrap_and_tag(:bare_verse)
@@ -51,9 +52,9 @@ defmodule LyricScreen.Song.Parser do
 		|> optional(
 			repeat(verse)
 			|> tag(:verses)
-			|> ignore(repeat(empty_line()))
-			|> ignore(eos())
 		)
+		|> ignore(repeat(empty_line()))
+		|> ignore(eos())
 end
 
 defmodule LyricScreen.Song.File do
