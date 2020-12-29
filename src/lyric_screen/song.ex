@@ -50,6 +50,7 @@ defmodule LyricScreen.Song.Parser do
 		|> ignore(repeat(empty_line()))
 		|> optional(
 			repeat(verse)
+			|> tag(:verses)
 			|> ignore(repeat(empty_line()))
 			|> ignore(eos())
 		)
@@ -109,7 +110,7 @@ defmodule LyricScreen.Song.File do
 
 	# TODO: parallelize?
 	def all_data do
-		case ls do
+		case ls() do
 			{:ok, f} -> Enum.map(f, &{&1, file_data(&1)})
 			{:error, _reason} = err -> err
 		end
@@ -152,11 +153,15 @@ defmodule LyricScreen.Song do
 	]
 
 	def load_from_string(str), do: F.data(str) |> do_load()
-	def load_from_file(title), do: F.file_data(title) |> do_load()
+	def load_from_file(title), do: F.file_data(title) |> do_load(title)
 
-	defp do_load(raw_data) do
+	defp do_load({:ok, [{:title, title} | _rest]} = raw_data, key \\ nil) do
 		Logger.warn(inspect(raw_data))
 		# TODO: need post-processing into struct
+		{:ok, %__MODULE__{
+			key: key,
+			display_title: title,
+		}}
 	end
 
 	def to_binary_stream(%__MODULE__{} = song) do

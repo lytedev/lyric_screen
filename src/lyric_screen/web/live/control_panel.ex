@@ -3,7 +3,7 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 
 	use Phoenix.LiveView
 	use Phoenix.HTML
-	alias LyricScreen.{Playlist, Display}
+	alias LyricScreen.{Playlist, Display, Song}
 	require Logger
 
 	def render(assigns) do
@@ -30,16 +30,22 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 		{:ok, load_display(socket, session["display"])}
 	end
 
-	def load_playlist(socket, playlist_id) do
-		{:ok, playlist} = Playlist.load_from_file(playlist_id)
-		assign(socket, playlist: playlist)
-	end
-
 	def load_display(socket, display_id) do
 		{:ok, display} = Display.load_from_file(display_id)
 		socket
 		|> assign(display: display)
 		|> load_playlist(display.playlist)
+	end
+
+	def load_playlist(socket, playlist_id) do
+		{:ok, playlist} = Playlist.load_from_file(playlist_id)
+		assign(socket, playlist: playlist)
+		|> load_song(Enum.at(playlist.songs, socket.assigns.display.current_song_index))
+	end
+
+	def load_song(socket, song_key) do
+		{:ok, song} = Song.load_from_file(song_key)
+		assign(socket, song: song)
 	end
 
 	def handle_event("remove_song_at", %{"index" => index}, socket) do
