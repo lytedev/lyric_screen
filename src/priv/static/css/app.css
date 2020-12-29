@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
 
+*, *::before, *::after {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
 :root {
 	--bg: #111;
 	--fg: #fff;
@@ -20,12 +26,4 @@ code, pre {
 
 a {
 	color: var(--lc);
-}
-
-li {
-	border-left: solid 5px transparent;
-}
-
-li.active {
-	border-left: solid 5px var(--lc);
 }

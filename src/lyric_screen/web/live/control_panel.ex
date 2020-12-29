@@ -17,6 +17,7 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 						<a href="#" phx-click="remove_song_at" phx-value-index="<%= i %>">-</a>
 					</li>
 				<% end %>
+				<code><%= inspect(@song) %></code>
 			</ul>
 		</div>
 		"""
@@ -57,7 +58,10 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 
 	def handle_event("set_current_song", %{"index" => index}, socket) do
 		{:ok, display} = Display.set_current_song_index(socket.assigns.display, String.to_integer(index))
-		{:noreply, assign(socket, display: display)}
+		{:noreply, socket
+			|> assign(display: display)
+			|> load_song(Enum.at(socket.assigns.playlist.songs, display.current_song_index))
+		}
 	end
 
 	def handle_event("nav", _path, socket) do

@@ -28,7 +28,7 @@ defmodule LyricScreen.Song.Parser do
 		)
 
 	named_verse =
-		ascii_string([not: @verse_name_delim], min: 1)
+		ascii_string([not: @verse_name_delim, not: @ascii_newline], min: 1)
 		|> unwrap_and_tag(:verse_name)
 		|> ignore(ascii_char([@verse_name_delim]))
 		|> ignore(eol())
@@ -37,7 +37,7 @@ defmodule LyricScreen.Song.Parser do
 
 	ref_verse =
 		ignore(ascii_char([@verse_ref_pref]))
-		|> ascii_string([not: @verse_ref_suff], min: 1)
+		|> ascii_string([not: @verse_ref_suff, not: @ascii_newline], min: 1)
 		|> ignore(ascii_char([@verse_ref_suff]))
 		|> unwrap_and_tag(:verse_ref)
 
@@ -155,12 +155,23 @@ defmodule LyricScreen.Song do
 	def load_from_string(str), do: F.data(str) |> do_load()
 	def load_from_file(title), do: F.file_data(title) |> do_load(title)
 
-	defp do_load({:ok, [{:title, title} | _rest]} = raw_data, key \\ nil) do
-		Logger.warn(inspect(raw_data))
-		# TODO: need post-processing into struct
+	defp map_raw_verse({:bare_verse, content}), do: %SongVerse{type: :bare, content: content}
+	defp map_raw_verse({:verse_ref, content}), do: %SongVerse{type: :ref, content: content}
+	defp map_raw_verse({:named_verse, [{:verse_name, key} | content]}), do: %SongVerse{type: :named, content: content, key: key}
+
+	defp do_load({:ok, data_kw} = raw_data, key \\ nil) do
+		title = Keyword.get(data_kw, :title, "Song Title")
+		metadata = Keyword.get(data_kw, :metadata, [])
+		verses =
+			data_kw
+			|> Keyword.get(:verses, [])
+			|> Enum.map(&map_raw_verse/1)
+
 		{:ok, %__MODULE__{
 			key: key,
 			display_title: title,
+			metadata: metadata,
+			verses: verses,
 		}}
 	end
 

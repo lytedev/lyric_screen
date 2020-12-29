@@ -17,7 +17,7 @@ config :logger, level: :debug
 
 config :logger, :console,
 	metadata: [:time, :level, :file, :function, :line, :mfa, :module, :pid, :request_id],
-	format: " - $metadata\n$message\n\n",
+	format: "  => $metadata\n$message\n\n",
 	colors: [enabled: true]
 
 config :phoenix, :json_library, Jason

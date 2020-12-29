@@ -55,6 +55,8 @@ defmodule LyricScreen.Display do
 		playlist: "default",
 		current_song_index: 0,
 		current_slide_index: 0,
+		frozen?: false,
+		hidden?: false,
 	]
 
 	def load_from_file(f), do: F.parse_file(f)
