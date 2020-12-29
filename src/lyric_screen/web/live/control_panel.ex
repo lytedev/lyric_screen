@@ -83,6 +83,7 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 	end
 
 	def load_song(socket, song_id \\ nil) do
+		Logger.debug(inspect({socket.assigns.playlist, song_id}))
 		case Playlist.song_at(socket.assigns.playlist, song_id || socket.assigns.display.current_song_index) do
 			{:ok, song} ->
 				socket

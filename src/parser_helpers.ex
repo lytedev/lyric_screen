@@ -7,10 +7,10 @@ defmodule LyricScreen.ParserHelpers do
 
 	@newline 10 # ascii newline \n char
 
-	def s(c \\ empty()), do: c |> utf8_char([?\s, ?\t])
-	def ws(c \\ empty()), do: c |> utf8_char([?\s, ?\n, ?\t, ?\r])
-	def eol(c \\ empty()), do: choice(c, [string("\r\n"), string("\n")])
-	def eosl(c \\ empty()), do: choice(c, [eol(), eos()])
+	def s(c \\ empty()), do: c |> utf8_char([?\s, ?\t]) |> label("non-newline whitespace")
+	def ws(c \\ empty()), do: c |> utf8_char([?\s, ?\n, ?\t, ?\r]) |> label("any whitespace")
+	def eol(c \\ empty()), do: choice(c, [string("\r\n"), string("\n")]) |> label("newline")
+	def eosl(c \\ empty()), do: choice(c, [eol(), eos()]) |> label("end of line or string")
 
 	def non_empty_line(c \\ empty()) do
 		c

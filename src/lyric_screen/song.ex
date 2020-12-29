@@ -38,14 +38,17 @@ defmodule LyricScreen.Song.Parser do
 
 	ref_verse =
 		ignore(utf8_char([@verse_ref_pref]))
+		|> ignore(repeat(s()))
 		|> utf8_string([not: @verse_ref_suff, not: @newline], min: 1)
+		|> ignore(repeat(s()))
 		|> ignore(utf8_char([@verse_ref_suff]))
 		|> ignore(repeat(s()))
 		|> ignore(eosl())
+		|> lookahead(choice([utf8_char([@newline]), eos()]))
 		|> unwrap_and_tag(:verse_ref)
 
 	bare_verse = trimmed_non_empty_line_chunk() |> unwrap_and_tag(:bare_verse)
-	verse = choice([ref_verse, named_verse, bare_verse]) |> ignore(choice([empty_line(), eos()]))
+	verse = choice([named_verse, ref_verse, bare_verse]) |> ignore(choice([times(empty_line(), min: 1), eos()]))
 
 	defparsec :raw_data,
 		title
@@ -176,7 +179,7 @@ defmodule LyricScreen.Song do
 			verses: verses,
 		}}
 	end
-	defp do_load(_, _), do: :error
+	defp do_load(err, key), do: {:error, {err, key}}
 
 	def get_named_verse(%__MODULE__{verses: verses}, name, default \\ nil) do
 		default = default || %SongVerse{type: :bare, key: name, content: [""]}
@@ -190,13 +193,21 @@ defmodule LyricScreen.Song do
 	def map(%__MODULE__{verses: verses, display_title: title} = song, "@default") do
 		mapped_verses =
 			verses
-			|> Enum.reduce([], fn (v, acc) ->
-				case v do
-					%SongVerse{type: :bare} = sv -> [{"", sv} | acc]
-					%SongVerse{type: :named} = sv -> [{sv.key, sv} | acc]
-					%SongVerse{type: :ref, key: key} = sv -> [{sv.key, get_named_verse(song, key)} | acc]
-				end
+			|> Enum.reduce({title, []}, fn (v, {last, acc}) ->
+				add =
+					case v do
+						%SongVerse{type: :bare} = sv -> {"", sv}
+						%SongVerse{type: :named} = sv -> {sv.key, sv}
+						%SongVerse{type: :ref, key: key} ->
+							if String.downcase(key) == "repeat" do
+								{key, elem(last, 1)}
+							else
+								{key, get_named_verse(song, key)}
+							end
+					end
+				{add, [add | acc]}
 			end)
+			|> elem(1)
 			|> Enum.map(fn {key, sv} -> {key, SongVerse.content(sv)} end)
 			|> Enum.reverse()
 		[{"@title", title} | mapped_verses]

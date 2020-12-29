@@ -15,6 +15,10 @@ defmodule LyricScreen.SongParserTest do
 	# TODO: property tests...?
 
 	describe "parser" do
+		test "does not error on whatever corpus exists - parser should be resilient to input" do
+			assert nil == LyricScreen.Song.File.all_data() |> Enum.find(fn {_key, {result, _data}} -> result == :error end)
+		end
+
 		test "fails to parse empty song data" do
 			assert_parser_raw_data_results("", {:error, _, _, %{}, {_, _}, _})
 		end
@@ -26,6 +30,19 @@ defmodule LyricScreen.SongParserTest do
 
 		test "parses simplest possible song" do
 			assert_parser_raw_data_results("a", {:ok, [title: "a", verses: []], "", %{}, {_, _}, _})
+		end
+
+		test "parses simple song with one verse" do
+			assert_parser_raw_data_results("a\n\na", {:ok, [title: "a", verses: [{:bare_verse, ["a"]}]], "", _, _, _})
+		end
+
+		test "parses almost-ref-verses" do
+			assert_parser_raw_data_results("a\n\n(a)\na", {:ok, [title: "a", verses: [{:bare_verse, ["(a)", "a"]}]], "", %{}, {_, _}, _})
+		end
+
+		test "parses botched ref-verse" do
+			assert_parser_raw_data_results("a\n\n(a\na", {:ok, [title: "a", verses: [{:bare_verse, ["(a", "a"]}]], "", %{}, {_, _}, _})
+			assert_parser_raw_data_results("a\n\n(a)a\na", {:ok, [title: "a", verses: [{:bare_verse, ["(a)a", "a"]}]], "", %{}, {_, _}, _})
 		end
 
 		test "parses basic song regardless of trailing newlines" do
@@ -221,6 +238,5 @@ defmodule LyricScreen.SongParserTest do
 				],
 			], "", %{}, {_, _}, _})
 		end
-
 	end
 end
