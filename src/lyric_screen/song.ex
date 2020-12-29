@@ -140,7 +140,7 @@ defmodule LyricScreen.SongVerse do
 
 	def serialize(%__MODULE__{type: :bare} = sv), do: content(sv)
 	def serialize(%__MODULE__{type: :ref, key: key}), do: "(#{key})"
-	def serialize(%__MODULE__{type: :named, key: key} = sv), do: "#{key}\n#{content(sv)}"
+	def serialize(%__MODULE__{type: :named, key: key} = sv), do: "#{key}:\n#{content(sv)}"
 end
 
 defmodule LyricScreen.Song do
@@ -193,7 +193,7 @@ defmodule LyricScreen.Song do
 	def map(%__MODULE__{verses: verses, display_title: title} = song, "@default") do
 		mapped_verses =
 			verses
-			|> Enum.reduce({title, []}, fn (v, {last, acc}) ->
+			|> Enum.reduce({{"@title", [title]}, []}, fn (v, {last, acc}) ->
 				add =
 					case v do
 						%SongVerse{type: :bare} = sv -> {"", sv}
@@ -219,8 +219,9 @@ defmodule LyricScreen.Song do
 
 	def to_binary_stream(%__MODULE__{} = song) do
 		Stream.concat([
-			[song.display_title, "\n\n"],
+			[song.display_title, "\n"],
 			Stream.map(song.metadata, &serialize_metadata/1),
+			["\n\n"],
 			song.verses
 				|> Stream.map(&SongVerse.serialize/1)
 				|> Stream.intersperse("\n\n")
@@ -240,13 +241,18 @@ defmodule LyricScreen.Song do
 		|> Stream.run()
 		File.rename!(Path.join(F.dir(), key <> ".txt.new"), Path.join(F.dir(), key <> ".txt"))
 
-		:ok
+		{:ok, song}
 	rescue
 		err ->
 			Logger.error(inspect(err))
-			:error
+			{:error, err}
 	end
 
+	defp serialize_metadata({key, val}) do
+		Logger.debug(inspect({key, val}))
+		"#{key}: #{val}"
 	defp serialize_metadata({key, val}), do: "#{key}: #{val}"
 	defp serialize_metadata(x), do: to_string(x)
+
+	def set_verses(%__MODULE__{} = song, verses), do: %{song | verses: verses} |> save_to_file()
 end

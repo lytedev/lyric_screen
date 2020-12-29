@@ -98,9 +98,11 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 	def add_song_to_playlist(socket, song_key) do
 		case Playlist.append_song(socket.assigns.playlist, song_key) do
       {:ok, playlist} ->
-        socket
-        |> assign(playlist: playlist)
-        |> set_current_song(Enum.count(socket.assigns.playlist.songs))
+				{:noreply,
+					socket
+					|> assign(playlist: playlist)
+					|> set_current_song(Enum.count(socket.assigns.playlist.songs))
+				}
 			_ -> {:noreply, socket}
 		end
 	end
@@ -109,36 +111,77 @@ defmodule LyricScreen.Web.Live.ControlPanel do
     {:ok, display} = Display.set_current_song_index(socket.assigns.display, i)
 		socket = socket |> assign(display: display) |> load_song()
 		send_song_sync(socket)
-		{:noreply, socket}
+		socket
   end
 
   def set_current_slide(socket, i \\ nil) do
     {:ok, display} = Display.set_current_slide_index(socket.assigns.display, i)
 		send_display_sync(socket, display)
-		{:noreply, socket |> assign(display: display)}
+		assign(socket, display: display)
   end
 
 	def show_add_song_form(socket), do: {:noreply, assign(socket, adding_song?: true)}
+
+	def reorder_song(socket, old_at, new_at) do
+		playlist = socket.assigns.playlist
+		old_songs = playlist.songs
+		{song, rest} = List.pop_at(old_songs, old_at)
+		songs = List.insert_at(rest, new_at, song)
+		case Playlist.set_songs(playlist, songs) do
+			{:ok, playlist} ->
+				socket =
+					socket
+					|> assign(playlist: playlist)
+					|> set_current_song(new_at)
+				send_playlist_sync(socket)
+				send_display_sync(socket)
+				socket
+			err ->
+				Logger.error(inspect(err))
+				socket
+		end
+	end
+
+	def reorder_slide(socket, old_at, new_at) do
+		song = socket.assigns.song
+		old_verses = song.verses
+		{verse, rest} = List.pop_at(old_verses, old_at)
+		verses = List.insert_at(rest, new_at, verse)
+		case Song.set_verses(song, verses) do
+			{:ok, song} ->
+				socket =
+					socket
+					|> assign(song: song, slides: Song.map(song))
+					|> set_current_slide(new_at + 1)
+				send_song_sync(socket)
+				socket
+			err ->
+				Logger.error(inspect(err))
+				socket
+		end
+	end
 
 	def handle_event("remove_song_at", %{"index" => index}, socket) do
 		case Playlist.remove_song_at(socket.assigns.playlist, String.to_integer(index)) do
       {:ok, playlist} ->
 				send_playlist_sync(socket, playlist)
-        socket
-        |> assign(playlist: playlist)
-        |> set_current_song()
+				{:noreply,
+					socket
+					|> assign(playlist: playlist)
+					|> set_current_song()
+				}
 			_ -> {:noreply, socket}
 		end
 	end
 
 	def handle_event("set_current_song", %{"index" => index}, socket) do
     i = String.to_integer(index)
-    set_current_song(socket, i)
+		{:noreply, set_current_song(socket, i)}
   end
 
 	def handle_event("set_current_slide", %{"index" => index}, socket) do
     i = String.to_integer(index)
-    set_current_slide(socket, i)
+		{:noreply, set_current_slide(socket, i)}
   end
 
   def handle_event("suggest_song", %{"song" => _search_term}, socket) do
@@ -161,6 +204,13 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 		|> add_song_to_playlist(song)
 	end
   def handle_event("add_song", _, socket), do: show_add_song_form(socket)
+
+	def handle_event("dropped", %{"new_at" => new_at, "old_at" => old_at, "type" => type}, socket) do
+		case type do
+			"slides" -> {:noreply, reorder_slide(socket, old_at, new_at)}
+			"songlist" -> {:noreply, reorder_song(socket, old_at, new_at)}
+		end
+	end
 
 	def handle_event("nav", _path, socket), do: {:noreply, socket}
 	def handle_event("hide_sidebar", _path, socket), do: {:noreply, assign(socket, show_sidebar?: false)}

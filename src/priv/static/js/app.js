@@ -1,9 +1,31 @@
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
 let hooks = {
+	dragdrop: {
+		mounted(a, b, c) {
+			const hook = this
+			console.log("drag_and_drop mounted", this, a, b, c)
+			new Sortable(this.el, {
+				animation: 0,
+				delay: 50,
+				delayOnTouchOnly: true,
+				group: this.el.dataset.group,
+				draggable: '.draggable',
+				ghostClass: 'draggable-ghost',
+				onEnd: (ev) => {
+					console.log(ev)
+					hook.pushEventTo('#' + this.el.id, 'dropped', {
+						old_at: parseInt(ev.item.attributes["draggable-index"].value),
+						new_at: ev.newDraggableIndex,
+						type: ev.to.id,
+					});
+				},
+			});
+		},
+	},
 	focus: {
 		mounted(a, b, c) {
-			console.log("mounted", this, a, b, c)
+			console.log("focus mounted", this, a, b, c)
 			if ("select" in this.el) this.el.select()
 		},
 		destroyed() {},

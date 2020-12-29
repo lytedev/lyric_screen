@@ -1,15 +1,16 @@
 <div class="flex" id="control-panel">
 	<%= if @show_sidebar? do %>
 		<div id="sidebar">
-			<header>
-				Playlist: <%= @playlist.key %> (<%= Enum.count(@playlist.songs) %> songs)
+			<header class="flex">
+				<span>Playlist: <%= @playlist.key %></span>
+				<span class="flex-push-right">(<%= @display.current_song_index + 1 %> of <%= Enum.count(@playlist.songs) %> songs)</span>
 			</header>
 			<%= if songs(@playlist) == [] do %>
 				<p class="alert info text-center">This playlist is empty! Add some songs!</p>
 			<% else %>
-				<ul id="songlist">
+				<ul id="songlist" phx-hook="dragdrop" data-group="song">
 					<%= for {s, i} <- Enum.with_index(songs(@playlist)) do %>
-						<li class="flex<%= if current_song?(@display, i) do %> active<% end %>" id="songlist-<%= i %>">
+						<li draggable-index="<%= i %>" draggable="true" class="draggable flex<%= if current_song?(@display, i) do %> active<% end %>" id="songlist-<%= i %>">
 							<a phx-click="set_current_song" phx-value-index="<%= i %>"><%= s %></a>
 							<div class="actions">
 								<button class="i" phx-click="remove_song_at" phx-value-index="<%= i %>"><i class="material-icons">remove_circle</i></button>
@@ -48,9 +49,9 @@
 		</div>
 	<% end %>
 
-	<div id="slides">
+	<div id="slides" phx-hook="dragdrop" data-group="slides">
 		<%= for {{title, content}, i} <- Enum.with_index(assigns[:slides] || []) do %>
-			<div phx-click="set_current_slide" phx-value-index="<%= i %>" class="slide<%= if current_slide?(@display, i) do %> active<% end %>">
+			<div draggable-index="<%= i - 1 %>" id="slide-<%= i %>" phx-click="set_current_slide" phx-value-index="<%= i %>" draggable="true" class="slide<%= if current_slide?(@display, i) do %> active<% end %><%= if title != "@title" do %> draggable<% end %>">
 				<span class="slide-title"><%= title %></span>
 				<%= content %>
 			</div>

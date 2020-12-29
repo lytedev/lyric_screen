@@ -123,4 +123,6 @@ defmodule LyricScreen.Playlist do
 			{:error, playlist}
 		end
 	end
+
+	def set_songs(%__MODULE__{} = playlist, songs), do: %{playlist | songs: songs} |> save_to_file()
 end

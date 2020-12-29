@@ -154,6 +154,10 @@ button.i {
 	padding: 0;
 }
 
+#songlist li.draggable-ghost {
+	opacity: 0.75;
+}
+
 #sidebar > .actions {
 	padding-bottom: 0.25em;
 	display: flex;
