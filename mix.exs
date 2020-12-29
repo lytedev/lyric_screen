@@ -61,7 +61,7 @@ defmodule LyricScreen.MixProject do
 
 	def application, do: [
 		mod: {LyricScreen.Application, []},
-		extra_applications: [:logger, :runtime_tools]
+		extra_applications: [:logger, :runtime_tools, :os_mon]
 	]
 
 	defp elixirc_paths(:test), do: elixirc_paths(nil) ++ [Path.join(@test_path, "support")]

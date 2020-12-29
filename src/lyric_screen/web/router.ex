@@ -21,7 +21,8 @@ defmodule LyricScreen.Web.Router do
 		get "/", PageController, :index
 		live "/clock", Live.Clock
 		live "/dashboard", Live.Dashboard
-		get "/control-panel/display/:id", DisplayController, :show_control_panel
+		get "/display/controls/:id", DisplayController, :show_control_panel
+		get "/display/:id", DisplayController, :show_control_panel
 	end
 
 	# Other scopes may use custom stacks.
@@ -41,7 +42,7 @@ defmodule LyricScreen.Web.Router do
 
 		scope "/admin" do
 			pipe_through :browser
-			live_dashboard "/dashboard", metrics: LyricScreen.Web.Telemetry
+			live_dashboard "/live-dashboard", metrics: LyricScreen.Web.Telemetry
 		end
 	end
 end

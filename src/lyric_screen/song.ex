@@ -12,14 +12,14 @@ defmodule LyricScreen.Song.Parser do
 	@verse_ref_pref ?(
 	@verse_ref_suff ?)
 
-	title = non_empty_line() |> unwrap_and_tag(:title)
+	title = trimmed_non_empty_line() |> unwrap_and_tag(:title)
 	named_metadata_element =
 		ascii_string([not: @metadata_delim, not: @ascii_newline], min: 1)
 		|> ignore(ascii_char([@metadata_delim]))
-		|> ignore(repeat(ascii_char([?\s, ?\n, ?\t]))) # ignore whitespace following delim
-		|> non_empty_line()
+		|> ignore(repeat(ws())) # ignore whitespace following delim
+		|> trimmed_non_empty_line()
 		|> tag(:meta_named)
-	bare_metadata_element = non_empty_line() |> tag(:meta_bare)
+	bare_metadata_element = trimmed_non_empty_line() |> tag(:meta_bare)
 
 	metadata =
 		optional(
@@ -32,7 +32,7 @@ defmodule LyricScreen.Song.Parser do
 		|> unwrap_and_tag(:verse_name)
 		|> ignore(ascii_char([@verse_name_delim]))
 		|> ignore(eol())
-		|> non_empty_line_chunk()
+		|> trimmed_non_empty_line_chunk()
 		|> unwrap_and_tag(:named_verse)
 
 	ref_verse =
@@ -41,7 +41,7 @@ defmodule LyricScreen.Song.Parser do
 		|> ignore(ascii_char([@verse_ref_suff]))
 		|> unwrap_and_tag(:verse_ref)
 
-	bare_verse = non_empty_line_chunk() |> unwrap_and_tag(:bare_verse)
+	bare_verse = trimmed_non_empty_line_chunk() |> unwrap_and_tag(:bare_verse)
 	verse = choice([ref_verse, named_verse, bare_verse]) |> ignore(choice([empty_line(), eos()]))
 
 	defparsec :raw_data,
