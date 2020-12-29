@@ -3,14 +3,16 @@ defmodule LyricScreen.Application do
 
 	use Application
 
+	alias LyricScreen.Web
+
 	def start(_type, _args) do
 		[:displays_dir, :playlists_dir, :songs_dir]
 		|> Enum.each(&(:ok = File.mkdir_p(Application.get_env(:lyric_screen, &1))))
 
 		children = [
-			LyricScreen.Web.Telemetry,
+			Web.Telemetry,
 			{Phoenix.PubSub, name: LyricScreen.PubSub},
-			LyricScreen.Web.Endpoint
+			Web.Endpoint
 		]
 
 		opts = [strategy: :one_for_one, name: LyricScreen.Supervisor]
@@ -18,7 +20,7 @@ defmodule LyricScreen.Application do
 	end
 
 	def config_change(changed, _new, removed) do
-		LyricScreen.Web.Endpoint.config_change(changed, removed)
+		Web.Endpoint.config_change(changed, removed)
 		:ok
 	end
 end

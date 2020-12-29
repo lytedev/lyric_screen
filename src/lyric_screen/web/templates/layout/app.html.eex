@@ -7,7 +7,7 @@
 		<title>LyricScreen · Phoenix Framework</title>
 		<%= csrf_meta_tag() %>
 	</head>
-	<body>
+	<body class="bg-white dark:bg-blue-900">
 		<main role="main" class="container">
 			<p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
 			<p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>

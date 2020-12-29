@@ -12,6 +12,8 @@ defmodule LyricScreen.SongParserTest do
 		end
 	end
 
+	# TODO: property tests...?
+
 	describe "parser" do
 		test "fails to parse empty song data" do
 			assert_parser_raw_data_results("", {:error, _, _, %{}, {_, _}, _})
@@ -118,5 +120,107 @@ defmodule LyricScreen.SongParserTest do
 				], "", %{}, {_, _}, _})
 			end
 		end
+
+		test "parses song ending with a ref verse" do
+			"""
+			The Title
+			# this is sort of a comment, but it's really just bare metadata
+			@default: Verse 1, Verse 1, Verse 1
+			metadata1: this is some metadata
+			background: https://placekitten.local/200/800
+			and this is a bare metadata entry
+
+			Verse 1:
+			Verse Content
+			More Verse Content
+
+			Bare
+			More Bare
+
+			(Verse 1)
+
+			(Verse 1)\s
+
+
+			"""
+			|> assert_parser_raw_data_results({:ok, [
+				title: "The Title",
+				metadata: [
+					{:meta_bare, _},
+					{:meta_named, ["@default", _]},
+					{:meta_named, ["metadata1", "this is some metadata"]},
+					{:meta_named, ["background", "https://placekitten.local/200/800"]},
+					{:meta_bare, ["and this is a bare metadata entry"]},
+				],
+				verses: [
+					{:named_verse, [{:verse_name, "Verse 1"}, "Verse Content", "More Verse Content"]},
+					{:bare_verse, ["Bare", "More Bare"]},
+					{:verse_ref, "Verse 1"},
+					{:verse_ref, "Verse 1"}
+				],
+			], "", %{}, {_, _}, _})
+		end
+
+		test "parses song ending with a mixing of ref verses" do
+			"""
+			Song
+			meta: mm
+
+			v1a:
+			v1a
+
+			v1b:
+			v1b
+
+			Pre-Chorus:
+			pc
+
+			Chorus:
+			ch
+
+			v2a:
+			v2a
+
+			v2b:
+			v2b
+
+			(Pre-Chorus)
+
+			(Chorus)
+
+			Tag:
+			ttyl
+
+			(Tag)
+
+			(Chorus)
+
+			(Pre-Chorus)
+
+			(Chorus)
+			"""
+			|> assert_parser_raw_data_results({:ok, [
+				title: "Song",
+				metadata: [
+					{:meta_named, ["meta", "mm"]},
+				],
+				verses: [
+					{:named_verse, [{:verse_name, "v1a"}, "v1a"]},
+					{:named_verse, [{:verse_name, "v1b"}, "v1b"]},
+					{:named_verse, [{:verse_name, "Pre-Chorus"}, "pc"]},
+					{:named_verse, [{:verse_name, "Chorus"}, "ch"]},
+					{:named_verse, [{:verse_name, "v2a"}, "v2a"]},
+					{:named_verse, [{:verse_name, "v2b"}, "v2b"]},
+					{:verse_ref, "Pre-Chorus"},
+					{:verse_ref, "Chorus"},
+					{:named_verse, [{:verse_name, "Tag"}, "ttyl"]},
+					{:verse_ref, "Tag"},
+					{:verse_ref, "Chorus"},
+					{:verse_ref, "Pre-Chorus"},
+					{:verse_ref, "Chorus"},
+				],
+			], "", %{}, {_, _}, _})
+		end
+
 	end
 end

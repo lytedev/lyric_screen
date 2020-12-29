@@ -1,4 +1,6 @@
 defmodule LyricScreen.Display.File do
+	@moduledoc false
+
 	def dir, do: Application.get_env(:lyric_screen, :displays_dir)
 
 	defp valid_file?(f) do
@@ -48,7 +50,11 @@ defmodule LyricScreen.Display.File do
 end
 
 defmodule LyricScreen.Display do
+	@moduledoc false
+
+	alias LyricScreen.{Playlist, Song, SongVerse}
 	alias LyricScreen.Display.File, as: F
+	require Logger
 
 	defstruct [
 		key: nil,
@@ -65,7 +71,62 @@ defmodule LyricScreen.Display do
 		{:ok, display}
 	end
 
-	def set_current_song_index(%__MODULE__{} = display, index), do: %{display | current_song_index: index} |> save_to_file()
-	def set_current_slide_index(%__MODULE__{} = display, index), do: %{display | current_slide_index: index} |> save_to_file()
+	def playlist(%__MODULE__{playlist: playlist}), do: Playlist.load_from_file(playlist)
+
+	def current_song(%__MODULE__{current_song_index: i} = display) do
+		case playlist(display) do
+			{:ok, playlist} -> Playlist.song_at(playlist, i)
+			err ->
+				Logger.error(inspect(err))
+				err
+		end
+	end
+
+	def current_slides(%__MODULE__{} = display) do
+		case current_song(display) do
+			{:ok, song} -> Song.map(song)
+			err ->
+				Logger.error(inspect(err))
+				err
+		end
+	end
+
+	def set_current_song_index(%__MODULE__{} = display, index \\ nil) do
+    i = index || display.current_song_index
+		Logger.debug("Setting Current Song Index: #{i}")
+    num_songs =
+			case playlist(display) do
+				{:ok, playlist} -> Enum.count(playlist.songs)
+				_ -> 0
+			end
+		old_display = display
+		display = %{display | current_song_index: i, current_slide_index: 0}
+    cond do
+      i >= 0 and i < num_songs -> display
+			num_songs > 0 and i >= num_songs ->
+				{:ok, display} = set_current_song_index(display, i - 1)
+				display
+      true -> old_display
+    end
+		|> save_to_file()
+	end
+
+	def set_current_slide_index(%__MODULE__{} = display, index \\ nil) do
+    i = index || display.current_slide_index
+		Logger.debug("Setting Current Slide Index: #{i}")
+		old_display = display
+		num_slides = display |> current_slides() |> Enum.count()
+		display = %{display | current_slide_index: i}
+		cond do
+			# TODO: check if song navigation is even possible - may be a noop
+			i == -1 -> set_current_song_index(display, display.current_song_index - 1)
+			i == num_slides -> set_current_song_index(display, display.current_song_index + 1)
+			i >= 0 and i < num_slides -> display
+			num_slides > 0 and i >= num_slides -> set_current_slide_index(display, i - 1)
+			true -> old_display
+		end
+		|> save_to_file()
+	end
+
 	def set_playlist(%__MODULE__{} = display, p), do: %{display | playlist: p} |> save_to_file()
 end

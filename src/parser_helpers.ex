@@ -5,23 +5,23 @@ defmodule LyricScreen.ParserHelpers do
 
 	import NimbleParsec
 
-	@ascii_newline 10
+	@newline 10 # ascii newline \n char
 
-	def s(c \\ empty()), do: c |> ascii_char([?\s, ?\t])
-	def ws(c \\ empty()), do: c |> ascii_char([?\s, ?\n, ?\t, ?\r])
+	def s(c \\ empty()), do: c |> utf8_char([?\s, ?\t])
+	def ws(c \\ empty()), do: c |> utf8_char([?\s, ?\n, ?\t, ?\r])
 	def eol(c \\ empty()), do: choice(c, [string("\r\n"), string("\n")])
 	def eosl(c \\ empty()), do: choice(c, [eol(), eos()])
 
 	def non_empty_line(c \\ empty()) do
 		c
-		|> ascii_string([not: @ascii_newline], min: 1)
+		|> utf8_string([not: @newline], min: 1)
 		|> ignore(eosl())
 		|> label("non-empty line")
 	end
 
 	def empty_line(c \\ empty()) do
 		c
-		|> ascii_char([@ascii_newline])
+		|> utf8_char([@newline])
 		|> label("empty line")
 	end
 
@@ -34,7 +34,7 @@ defmodule LyricScreen.ParserHelpers do
 	def trimmed_non_empty_line(c \\ empty()) do
 		c
 		|> ignore(repeat(s()))
-		|> ascii_string([not: @ascii_newline], min: 1)
+		|> utf8_string([not: @newline], min: 1)
 		|> ignore(repeat(s()))
 		|> ignore(eosl())
 		|> label("trimmed non-empty line")

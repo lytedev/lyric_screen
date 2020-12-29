@@ -6,7 +6,7 @@ defmodule LyricScreen.Song.Parser do
 	import NimbleParsec
 	import LyricScreen.ParserHelpers
 
-	@ascii_newline 10
+	@newline 10
 	@verse_name_delim ?:
 	@metadata_delim @verse_name_delim
 	@verse_ref_pref ?(
@@ -14,8 +14,8 @@ defmodule LyricScreen.Song.Parser do
 
 	title = trimmed_non_empty_line() |> unwrap_and_tag(:title)
 	named_metadata_element =
-		ascii_string([not: @metadata_delim, not: @ascii_newline], min: 1)
-		|> ignore(ascii_char([@metadata_delim]))
+		utf8_string([not: @metadata_delim, not: @newline], min: 1)
+		|> ignore(utf8_char([@metadata_delim]))
 		|> ignore(repeat(ws())) # ignore whitespace following delim
 		|> trimmed_non_empty_line()
 		|> tag(:meta_named)
@@ -28,18 +28,20 @@ defmodule LyricScreen.Song.Parser do
 		)
 
 	named_verse =
-		ascii_string([not: @verse_name_delim, not: @ascii_newline], min: 1)
+		utf8_string([not: @verse_name_delim, not: @newline], min: 1)
 		|> unwrap_and_tag(:verse_name)
-		|> ignore(ascii_char([@verse_name_delim]))
+		|> ignore(utf8_char([@verse_name_delim]))
+		|> ignore(repeat(s()))
 		|> ignore(eol())
 		|> trimmed_non_empty_line_chunk()
 		|> unwrap_and_tag(:named_verse)
 
 	ref_verse =
-		ignore(ascii_char([@verse_ref_pref]))
-		|> ascii_string([not: @verse_ref_suff, not: @ascii_newline], min: 1)
-		|> ignore(ascii_char([@verse_ref_suff]))
-		|> ignore(eol())
+		ignore(utf8_char([@verse_ref_pref]))
+		|> utf8_string([not: @verse_ref_suff, not: @newline], min: 1)
+		|> ignore(utf8_char([@verse_ref_suff]))
+		|> ignore(repeat(s()))
+		|> ignore(eosl())
 		|> unwrap_and_tag(:verse_ref)
 
 	bare_verse = trimmed_non_empty_line_chunk() |> unwrap_and_tag(:bare_verse)
@@ -82,7 +84,7 @@ defmodule LyricScreen.Song.File do
 		end
 	end
 
-	def content(f) do
+	def content(f) when is_binary(f) do
 		ff = Path.join(dir(), f <> ".txt")
 		case File.read(ff) do
 			{:ok, content} ->
@@ -94,6 +96,7 @@ defmodule LyricScreen.Song.File do
 			{:error, _reason} = err -> err
 		end
 	end
+	def content(_), do: {:error, "no file name"}
 
 	def file_data(f) do
 		case content(f) do
@@ -129,11 +132,12 @@ defmodule LyricScreen.SongVerse do
 		content: [""],
 	]
 
-	defp content_string(content), do: Enum.join(content, "\n")
+	def content(%__MODULE__{content: content}), do: content(content)
+	def content(content) when is_list(content), do: Enum.join(content, "\n")
 
-	def serialize(%__MODULE__{type: :bare, content: content}), do: content_string(content)
-	def serialize(%__MODULE__{type: :ref, content: content}), do: "(#{content_string(content)})"
-	def serialize(%__MODULE__{type: :named, key: key, content: content}), do: "#{key}\n#{content_string(content)}"
+	def serialize(%__MODULE__{type: :bare} = sv), do: content(sv)
+	def serialize(%__MODULE__{type: :ref, key: key}), do: "(#{key})"
+	def serialize(%__MODULE__{type: :named, key: key} = sv), do: "#{key}\n#{content(sv)}"
 end
 
 defmodule LyricScreen.Song do
@@ -156,11 +160,8 @@ defmodule LyricScreen.Song do
 	def load_from_string(str), do: F.data(str) |> do_load()
 	def load_from_file(title), do: F.file_data(title) |> do_load(title)
 
-	defp map_raw_verse({:bare_verse, content}), do: %SongVerse{type: :bare, content: content}
-	defp map_raw_verse({:verse_ref, content}), do: %SongVerse{type: :ref, content: content}
-	defp map_raw_verse({:named_verse, [{:verse_name, key} | content]}), do: %SongVerse{type: :named, content: content, key: key}
-
-	defp do_load({:ok, data_kw} = raw_data, key \\ nil) do
+	defp do_load(raw_data, key \\ nil)
+	defp do_load({:ok, data_kw} = _raw_data, key) do
 		title = Keyword.get(data_kw, :title, "Song Title")
 		metadata = Keyword.get(data_kw, :metadata, [])
 		verses =
@@ -175,6 +176,35 @@ defmodule LyricScreen.Song do
 			verses: verses,
 		}}
 	end
+	defp do_load(_, _), do: :error
+
+	def get_named_verse(%__MODULE__{verses: verses}, name, default \\ nil) do
+		default = default || %SongVerse{type: :bare, key: name, content: [""]}
+		case Enum.find(verses, fn v -> v.key == name && v.type == :named end) do
+			%SongVerse{} = msv -> msv
+			_ -> default
+		end
+	end
+
+	def map(song, map_name \\ "@default")
+	def map(%__MODULE__{verses: verses, display_title: title} = song, "@default") do
+		mapped_verses =
+			verses
+			|> Enum.reduce([], fn (v, acc) ->
+				case v do
+					%SongVerse{type: :bare} = sv -> [{"", sv} | acc]
+					%SongVerse{type: :named} = sv -> [{sv.key, sv} | acc]
+					%SongVerse{type: :ref, key: key} = sv -> [{sv.key, get_named_verse(song, key)} | acc]
+				end
+			end)
+			|> Enum.map(fn {key, sv} -> {key, SongVerse.content(sv)} end)
+			|> Enum.reverse()
+		[{"@title", title} | mapped_verses]
+	end
+
+	defp map_raw_verse({:bare_verse, content}), do: %SongVerse{type: :bare, content: content}
+	defp map_raw_verse({:verse_ref, content}), do: %SongVerse{type: :ref, key: content, content: []}
+	defp map_raw_verse({:named_verse, [{:verse_name, key} | content]}), do: %SongVerse{type: :named, content: content, key: key}
 
 	def to_binary_stream(%__MODULE__{} = song) do
 		Stream.concat([
@@ -195,9 +225,9 @@ defmodule LyricScreen.Song do
 	def save_to_file(%__MODULE__{key: key} = song) do
 		song
 		|> to_binary_stream
-		|> Stream.into(File.stream!(Path.join(F.default_dir(), key <> ".txt.new"), [:write, :utf8]))
+		|> Stream.into(File.stream!(Path.join(F.dir(), key <> ".txt.new"), [:write, :utf8]))
 		|> Stream.run()
-		File.rename!(Path.join(F.default_dir(), key <> ".txt.new"), Path.join(F.default_dir(), key <> ".txt"))
+		File.rename!(Path.join(F.dir(), key <> ".txt.new"), Path.join(F.dir(), key <> ".txt"))
 
 		:ok
 	rescue

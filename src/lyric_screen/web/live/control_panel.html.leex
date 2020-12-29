@@ -1,0 +1,64 @@
+<div class="flex" id="control-panel">
+	<%= if @show_sidebar? do %>
+		<div id="sidebar">
+			<header>
+				Playlist: <%= @playlist.key %> (<%= Enum.count(@playlist.songs) %> songs)
+			</header>
+			<%= if songs(@playlist) == [] do %>
+				<p class="alert info text-center">This playlist is empty! Add some songs!</p>
+			<% else %>
+				<ul id="songlist">
+					<%= for {s, i} <- Enum.with_index(songs(@playlist)) do %>
+						<li class="flex<%= if current_song?(@display, i) do %> active<% end %>" id="songlist-<%= i %>">
+							<a phx-click="set_current_song" phx-value-index="<%= i %>"><%= s %></a>
+							<div class="actions">
+								<button class="i" phx-click="remove_song_at" phx-value-index="<%= i %>"><i class="material-icons">remove_circle</i></button>
+							</div>
+						</li>
+					<% end %>
+				</ul>
+			<% end %>
+
+			<div class="actions flex-push-bottom">
+				<%= if @adding_song? do %>
+					<form class="flex flex-1" phx-submit="add_song" phx-change="suggest_song">
+						<input id="song_searc_input" phx-hook="focus" class="flex-1" list="songs" name="song" autocomplete="off" />
+						<%# <input id="add_song_input" autofocus value="Add Song" type="submit" phx-hook="focus" /> %>
+
+						<datalist id="songs">
+							<%= for s <- @suggested_songs do %>
+								<option value="<%= s %>" />
+							<% end %>
+						</datalist>
+					</form>
+					<button class="i input-overlay" phx-click="cancel_add_song"><i class="material-icons">cancel</i></button>
+				<% else %>
+					<div class="flex">
+						<button class="i" phx-click="add_song" title="Add Song to Playlist"><i class="material-icons">playlist_add</i></button>
+					</div>
+					<div class="flex flex-push-right">
+						<button phx-click="hide_sidebar" class="i" title="Hide Sidebar"><i class="material-icons">menu_open</i></button>
+					</div>
+				<% end %>
+			</div>
+		</div>
+	<% else %>
+		<div class="flex">
+			<button id="show-sidebar-button" phx-click="show_sidebar" class="i" title="Show Sidebar"><i class="material-icons">menu</i></button>
+		</div>
+	<% end %>
+
+	<div id="slides">
+		<%= for {{title, content}, i} <- Enum.with_index(assigns[:slides] || []) do %>
+			<div phx-click="set_current_slide" phx-value-index="<%= i %>" class="slide<%= if current_slide?(@display, i) do %> active<% end %>">
+				<span class="slide-title"><%= title %></span>
+				<%= content %>
+			</div>
+		<% end %>
+		<%# <pre><%= inspect(assigns[:slides], pretty: true) </pre> %>
+		<%# <pre><%= inspect(assigns[:song], pretty: true) </pre> %>
+		<%# <pre><%= inspect(assigns[:display], pretty: true) </pre> %>
+		<%# <pre><%= inspect(assigns[:playlist], pretty: true) </pre> %>
+		<%# <pre><%= inspect(@socket, pretty: true) </pre> %>
+	</div>
+</div>

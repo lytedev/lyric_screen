@@ -1,4 +1,6 @@
 defmodule LyricScreen.Playlist.File do
+	@moduledoc false
+
 	def dir, do: Application.get_env(:lyric_screen, :playlists_dir)
 
 	defp valid_file?(f) do
@@ -48,7 +50,10 @@ defmodule LyricScreen.Playlist.File do
 end
 
 defmodule LyricScreen.Playlist do
+	@moduledoc false
+
 	alias LyricScreen.Playlist.File, as: F
+	alias LyricScreen.Song
 
 	require Logger
 
@@ -58,11 +63,16 @@ defmodule LyricScreen.Playlist do
 		songs: [],
 	]
 
+	def song_at(%__MODULE__{songs: songs}, i, default \\ nil) do
+		songs |> Enum.at(i, default) |> Song.load_from_file()
+	end
+	def songs(%__MODULE__{songs: songs}), do: songs |> Enum.map(&Song.load_from_file/1)
+
 	def load_from_string(str, key \\ nil), do: str |> F.parse() |> do_load(key)
 	def load_from_file(title), do: title |> F.parse_file() |> do_load(title)
 
+	defp do_load({:error, err}, _), do: {:error, err}
 	defp do_load({:ok, {display_title, songs}}, key) do
-		Logger.warn(inspect(songs))
 		{:ok, %__MODULE__{
 			key: key,
 			display_title: display_title,
@@ -94,7 +104,7 @@ defmodule LyricScreen.Playlist do
 	rescue
 		err ->
 			Logger.error(inspect(err))
-			:error
+			{:error, playlist}
 	end
 
 	##################
@@ -102,5 +112,15 @@ defmodule LyricScreen.Playlist do
 	def remove_song_at(%__MODULE__{} = playlist, index) do
 		%{playlist | songs: List.delete_at(playlist.songs, index)}
 		|> save_to_file()
+	end
+
+	def append_song(%__MODULE__{songs: songs} = playlist, song_key) do
+		{:ok, all_songs} = Song.File.ls()
+		if song_key in all_songs do
+			%{playlist | songs: List.insert_at(songs, -1, song_key)}
+			|> save_to_file()
+		else
+			{:error, playlist}
+		end
 	end
 end

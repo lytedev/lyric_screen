@@ -14,13 +14,13 @@ defmodule LyricScreen.SongFileWatcher do
 		FileSystem.subscribe(pid)
 	end
 
-  def handle_info({:file_event, watcher_pid, {_path, _events}} = ev, %{watcher_pid: watcher_pid} = state) do
+	def handle_info({:file_event, watcher_pid, {_path, _events}} = ev, %{watcher_pid: watcher_pid} = state) do
 		Logger.warn(inspect({ev, state}))
-    {:noreply, state}
-  end
+		{:noreply, state}
+	end
 
-  def handle_info({:file_event, watcher_pid, :stop} = ev, %{watcher_pid: watcher_pid} = state) do
+	def handle_info({:file_event, watcher_pid, :stop} = ev, %{watcher_pid: watcher_pid} = state) do
 		Logger.error(inspect({ev, state}))
-    {:noreply, state}
-  end
+		{:noreply, state}
+	end
 end

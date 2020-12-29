@@ -1,4 +1,4 @@
-defmodule LyricScreen.Web.Live.ControlPanel do
+defmodule LyricScreen.Web.Live.ActiveSlideDisplay do
 	@moduledoc false
 
 	use Phoenix.HTML
@@ -20,39 +20,12 @@ defmodule LyricScreen.Web.Live.ControlPanel do
     }
 	end
 
-	def handle_info(%{event: "song_sync", topic: <<"display:", _display_id::binary>>, payload: %{song: song, slides: slides, display: display}} = ev, socket) do
-		Logger.debug(inspect(ev))
-		Logger.debug("Received Song Sync")
-		{:noreply, assign(socket, song: song, slides: slides, display: display)}
-	end
-
-	def handle_info(%{event: "playlist_sync", topic: <<"display:", _display_id::binary>>, payload: playlist} = ev, socket) do
-		Logger.debug(inspect(ev))
-		Logger.debug("Received Playlist Sync")
-		{:noreply, assign(socket, playlist: playlist)}
-	end
-
-	def handle_info(%{event: "display_sync", topic: <<"display:", _display_id::binary>>, payload: display} = ev, socket) do
-		Logger.debug(inspect(ev))
-		Logger.debug("Received Display Sync")
+	def handle_info(%{topic: <<"display:", _display_id::binary>>, payload: display}, socket) do
 		{:noreply, assign(socket, display: display)}
 	end
 
-	def send_playlist_sync(socket, playlist \\ nil) do
-		Logger.debug("Sending Song Sync")
-		d = playlist || socket.assigns.playlist
-		Endpoint.broadcast_from(self(), "display:#{socket.assigns.display.key}", "playlist_sync", d)
-	end
-
-	def send_song_sync(socket) do
-		Logger.debug("Sending Song Sync")
-		d = %{song: socket.assigns.song, slides: socket.assigns.slides, display: socket.assigns.display}
-		Endpoint.broadcast_from(self(), "display:#{socket.assigns.display.key}", "song_sync", d)
-	end
-
-	def send_display_sync(socket, display \\ nil) do
-		Logger.debug("Sending Display Sync")
-		d = display || socket.assigns.display
+	def send_display_update(socket) do
+		d = socket.assigns.display
 		Endpoint.broadcast_from(self(), "display:#{d.key}", "display_sync", d)
 	end
 
@@ -69,28 +42,38 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 	end
 
 	def load_playlist(socket, playlist_id) do
-		Logger.info(playlist_id)
-		case Playlist.load_from_file(playlist_id) do
-			{:ok, playlist} ->
-				socket
-				|> assign(playlist: playlist)
-				|> load_song()
-
-			err ->
-				Logger.error(inspect(err))
-				socket
-		end
+		{:ok, playlist} = Playlist.load_from_file(playlist_id)
+		assign(socket, playlist: playlist)
+		|> load_song(Enum.at(playlist.songs, socket.assigns.display.current_song_index))
 	end
 
-	def load_song(socket, song_id \\ nil) do
-		case Playlist.song_at(socket.assigns.playlist, song_id || socket.assigns.display.current_song_index) do
+	def load_song(socket, nil), do: socket
+	def load_song(socket, song_key) do
+		case Song.load_from_file(song_key) do
 			{:ok, song} ->
+				mapped_verses =
+					song.verses
+					|> Enum.reduce([], fn (v, acc) ->
+						case v do
+							%SongVerse{type: :bare} = sv -> [{"", Enum.join(sv.content, "\n")} | acc]
+							%SongVerse{type: :named} = sv -> [{sv.key, Enum.join(sv.content, "\n")} | acc]
+							%SongVerse{type: :ref, key: key} = sv ->
+								matching_verse =
+									song.verses
+									|> Enum.find(fn v -> v.key == key && v.type == :named end)
+									|> case do
+										%SongVerse{} = msv -> msv
+										_ -> %SongVerse{type: :bare, key: key, content: [""]}
+									end
+								[{sv.key, Enum.join(matching_verse.content, "\n")} | acc]
+						end
+					end)
+					|> Enum.reverse()
+				slides = [{"@title", song.display_title} | mapped_verses]
 				socket
 				|> assign(song: song)
-				|> assign(slides: Song.map(song))
-			err ->
-				Logger.error(inspect(err))
-				socket
+				|> assign(slides: slides)
+			_ -> socket
 		end
 	end
 
@@ -105,24 +88,51 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 	end
 
   def set_current_song(socket, i \\ nil) do
+    i = if i == nil, do: socket.assigns.display.current_song_index, else: i
+    num_songs = Enum.count(socket.assigns.playlist.songs)
     {:ok, display} = Display.set_current_song_index(socket.assigns.display, i)
-		socket = socket |> assign(display: display) |> load_song()
-		send_song_sync(socket)
-		{:noreply, socket}
+    {:ok, display} = Display.set_current_slide_index(display, 0)
+    cond do
+      i >= 0 and i < num_songs ->
+        {:noreply, socket
+          |> assign(display: display)
+          |> load_song(Enum.at(socket.assigns.playlist.songs, display.current_song_index))}
+
+      num_songs > 0 and i >= num_songs ->
+        Logger.warn("Backing up...")
+        set_current_song(socket, i - 1)
+
+      true ->
+        {:noreply, assign(socket, display: display, song: nil)}
+    end
   end
 
   def set_current_slide(socket, i \\ nil) do
+    i = if i == nil, do: socket.assigns.display.current_slide_index, else: i
+    num_slides = Enum.count(socket.assigns.slides)
     {:ok, display} = Display.set_current_slide_index(socket.assigns.display, i)
-		send_display_sync(socket, display)
-		{:noreply, socket |> assign(display: display)}
-  end
+		{rep, sock} =
+			cond do
+				i == -1 -> set_current_song(socket, socket.assigns.display.current_song_index - 1)
+				i == num_slides -> set_current_song(socket, socket.assigns.display.current_song_index + 1)
 
-	def show_add_song_form(socket), do: {:noreply, assign(socket, adding_song?: true)}
+				i >= 0 and i < num_slides ->
+					{:noreply, socket |> assign(display: display)}
+
+				num_slides > 0 and i >= num_slides ->
+					Logger.warn("Backing up...")
+					set_current_song(socket, i - 1)
+
+				true ->
+					{:noreply, assign(socket, display: display, song: nil)}
+			end
+		send_display_update(sock)
+		{rep, sock}
+  end
 
 	def handle_event("remove_song_at", %{"index" => index}, socket) do
 		case Playlist.remove_song_at(socket.assigns.playlist, String.to_integer(index)) do
       {:ok, playlist} ->
-				send_playlist_sync(socket, playlist)
         socket
         |> assign(playlist: playlist)
         |> set_current_song()
@@ -159,7 +169,9 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 		|> assign(adding_song?: false)
 		|> add_song_to_playlist(song)
 	end
-  def handle_event("add_song", _, socket), do: show_add_song_form(socket)
+  def handle_event("add_song", _, socket) do
+		{:noreply, assign(socket, adding_song?: true)}
+	end
 
 	def handle_event("nav", _path, socket), do: {:noreply, socket}
 	def handle_event("hide_sidebar", _path, socket), do: {:noreply, assign(socket, show_sidebar?: false)}

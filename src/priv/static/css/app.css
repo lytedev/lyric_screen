@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 *, *::before, *::after {
 	margin: 0;
@@ -10,14 +11,16 @@
 	--bg: #111;
 	--fg: #fff;
 	--lc: #c4f;
+	--lc-20: #d8f;
 	--f: Lato;
-	--mf: Iosevka;
+	--mf: Iosevka, monospace;
 }
 
 body {
 	background: var(--bg);
 	color: var(--fg);
 	font-family: var(--f);
+	font-size: 16px;
 }
 
 code, pre {
@@ -26,4 +29,225 @@ code, pre {
 
 a {
 	color: var(--lc);
+}
+
+h1 {
+	margin: 0.25rem;
+}
+
+input, button {
+	background: rgba(255,255,255,0.1);
+	border: none;
+	font: inherit;
+	font-size: inherit;
+	color: inherit;
+	border-radius: 2px;
+	margin: 0 0.25rem;
+	padding: 0.5em;
+}
+
+button, input[type=submit] { cursor: pointer; }
+button > i.material-icons {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+button.i {
+	background: transparent;
+	padding-top: 0.36em;
+	padding-bottom: 0.36em;
+}
+
+.flex-push-bottom {
+	margin-top: auto;
+}
+
+.flex-push-right {
+	margin-left: auto;
+}
+
+.flex-1 { flex: 1; }
+.flex-wrap { flex-wrap: wrap; }
+.flex { display: flex; }
+
+.text-center {
+	text-align: center;
+}
+
+.alert.info {
+	background-color: #125;
+	border: solid 1px #36c;
+	border-radius: 2px;
+	margin: 0.5em;
+}
+
+#sidebar {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	position: relative;
+	width: 320px;
+	height: 100vh;
+	overflow-x: scroll;
+	box-shadow: -1px 0px 10px rgba(0, 0, 0, 0.5);
+	background-color: rgba(255, 255, 255, 0.015);
+}
+
+#sidebar > p {
+	padding: 0.5em;
+}
+
+#sidebar > header {
+	padding: 0.5em;
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.input-overlay {
+	opacity: 0.25;
+	margin: 0;
+	padding: 0.4em 0.6em;
+	position: absolute;
+	right: 0;
+	transition: opacity 0.2s ease;
+}
+
+.input-overlay:hover {
+	opacity: 1;
+}
+
+#songlist li a {
+	cursor: pointer;
+	color: inherit;
+	border-right: solid 0.25em transparent;
+	flex: 1;
+	padding: 0.5em;
+	transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+#songlist li.active a {
+	border-right: solid 0.25em var(--lc);
+}
+#songlist li a:hover {
+	background-color: rgba(255, 255, 255, 0.05);
+}
+
+#songlist li button {
+}
+
+#songlist li {
+	position: relative;
+}
+#songlist li .actions {
+	z-index: 10;
+	position: absolute;
+	right: 0.5em;
+	top: 0;
+	bottom: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#songlist li .actions button.i {
+	margin: 0;
+	padding: 0;
+}
+
+#sidebar > .actions {
+	padding-bottom: 0.25em;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+}
+
+#show-sidebar-button {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	padding-bottom: 0.8em;
+}
+
+#slides {
+	overflow-y: auto;
+	max-height: 100vh;
+	padding: 0.5em;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-content: flex-start;
+	align-items: flex-start;
+}
+
+#slides .slide {
+	width: 320px;
+	height: 180px;
+	overflow: hidden;
+	position: relative;
+	padding: 0.25em;
+	background: #000;
+	border-radius: 5px;
+	border: solid 2px rgba(0, 0, 0, 0.0);
+	margin: 0.25em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	cursor: pointer;
+	white-space: pre;
+	transition: border 0.2s ease;
+}
+
+#slides .slide:hover {
+	border-color: #888;
+}
+
+#slides .slide.active {
+	border-color: var(--lc);
+}
+
+#slides .slide.active:hover {
+	border-color: var(--lc-20);
+}
+
+#slides .slide .slide-title {
+	opacity: 0.4;
+	position: absolute;
+	left: 0.25em;
+	top: 0.25em;
+	font-family: var(--mf);
+	font-size: 16px;
+	font-weight: 700;
+}
+
+@media (min-width: 800px) {
+	@keyframes actions-slide-left {
+		0% {
+			right: 0;
+			opacity: 0;
+		}
+
+		100% {
+			right: 0.5em;
+			opacity: 1;
+		}
+	}
+
+	.hoverable .show-on-hover {
+		display: none !important;
+	}
+
+	.hoverable:hover .show-on-hover {
+		display: inherit !important;
+	}
+
+	#songlist li .actions {
+		animation-play-state: running;
+		animation-fill-mode: backwards;
+		right: -1000em;
+	}
+	#songlist li:hover .actions {
+		animation: actions-slide-left 0.5s ease;
+		animation-fill-mode: forwards;
+	}
 }

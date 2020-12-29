@@ -1,4 +1,6 @@
 defmodule LyricScreen.Chat.File do
+	@moduledoc false
+
 	def dir, do: Application.get_env(:lyric_screen, :chats_dir)
 
 	def content(f) do
@@ -16,13 +18,15 @@ defmodule LyricScreen.Chat.File do
 end
 
 defmodule LyricScreen.Chat do
-	use Phoenix.Channel
-	def add_message(chat, from, content) do
+	@moduledoc false
+
+	# use Phoenix.Channel
+	def add_message(_chat, _from, _content) do
 	end
 
-	def load_history(chat) do
+	def load_history(_chat) do
 	end
 
-	def clear_chat(chat) do
+	def clear_chat(_chat) do
 	end
 end
