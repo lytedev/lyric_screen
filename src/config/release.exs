@@ -12,9 +12,15 @@ IO.puts("configuration, baby: #{inspect({port, host})}")
 
 config :lyric_screen, LyricScreen.Web.Endpoint,
 	url: [
-		port: port,
+		# scheme: "http",
 		host: host,
+		port: port,
+		# path: "/",
+	],
+	http: [
+		port: port,
 		# transport_options: [socket_opts: [:inet6]]
+		transport_options: [socket_opts: [:inet]]
 	],
 	secret_key_base: secret,
 	live_view: [signing_salt: lv_salt],

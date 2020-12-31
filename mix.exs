@@ -39,7 +39,8 @@ defmodule LyricScreen.MixProject do
 			path: Path.join(@build_path, "rel"),
 			include_erts: true,
 			rel_templates_path: Path.join(@src_path, "rel"),
-			steps: [:assemble],
+			steps: [&coalesce_static/1, :assemble],
+			# overlays: ["src/priv/static"],
 			runtime_config_path: Path.join(@config_dir_path, "release.exs"),
 		],
 	]
@@ -67,4 +68,15 @@ defmodule LyricScreen.MixProject do
 
 	defp elixirc_paths(:test), do: elixirc_paths(nil) ++ [Path.join(@test_path, "support")]
 	defp elixirc_paths(_), do: [@src_path]
+
+	def coalesce_static(r) do
+		IO.inspect(r, label: "release")
+		p = "src/priv/static"
+		d = Path.join([r.path, p])
+		File.mkdir_p!(d)
+		File.cp_r!(p, d)
+		|> IO.inspect()
+		IO.inspect(File.ls!(r.path))
+		r
+	end
 end
