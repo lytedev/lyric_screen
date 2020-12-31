@@ -57,6 +57,8 @@ defmodule LyricScreen.Display do
 	require Logger
 
 	defstruct [
+		# TODO: show_titles?: true,
+		# TODO: show_performer_metadata?: true,
 		key: nil,
 		playlist: "default",
 		current_song_index: 0,
@@ -100,7 +102,7 @@ defmodule LyricScreen.Display do
 				_ -> 0
 			end
 		old_display = display
-		display = %{display | current_song_index: i, current_slide_index: 0}
+		display = %{display | current_song_index: i}
     cond do
       i >= 0 and i < num_songs -> display
 			num_songs > 0 and i >= num_songs ->
@@ -113,19 +115,30 @@ defmodule LyricScreen.Display do
 
 	def set_current_slide_index(%__MODULE__{} = display, index \\ nil) do
     i = index || display.current_slide_index
+    s = display.current_song_index
 		Logger.debug("Setting Current Slide Index: #{i}")
 		old_display = display
 		num_slides = display |> current_slides() |> Enum.count()
+    num_songs =
+			case playlist(display) do
+				{:ok, playlist} -> Enum.count(playlist.songs)
+				_ -> 0
+			end
 		display = %{display | current_slide_index: i}
 		cond do
 			# TODO: check if song navigation is even possible - may be a noop
-			i == -1 -> set_current_song_index(display, display.current_song_index - 1)
-			i == num_slides -> set_current_song_index(display, display.current_song_index + 1)
-			i >= 0 and i < num_slides -> display
-			num_slides > 0 and i >= num_slides -> set_current_slide_index(display, i - 1)
-			true -> old_display
+			i == -1 && s > 0 ->
+				{:ok, display} = set_current_song_index(%{display | current_slide_index: 0}, display.current_song_index - 1)
+				save_to_file(display)
+			i == num_slides && s < num_songs - 1 ->
+				{:ok, display} = set_current_song_index(%{display | current_slide_index: 0}, display.current_song_index + 1)
+				save_to_file(display)
+			i >= 0 and i < num_slides -> {:ok, display}
+			num_slides > 0 and i >= num_slides ->
+				{:ok, display} = set_current_slide_index(display, i - 1)
+				save_to_file(display)
+			true -> {:ok, old_display}
 		end
-		|> save_to_file()
 	end
 
 	def set_playlist(%__MODULE__{} = display, p), do: %{display | playlist: p} |> save_to_file()

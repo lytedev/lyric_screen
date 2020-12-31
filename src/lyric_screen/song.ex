@@ -75,6 +75,8 @@ defmodule LyricScreen.Song.File do
 
 	def dir, do: Application.get_env(:lyric_screen, :songs_dir)
 
+	def exists?(key), do: File.exists?(Path.join(dir(), key <> ".txt"))
+
 	def ls do
 		case File.ls(dir()) do
 			{:ok, files} ->
@@ -248,11 +250,28 @@ defmodule LyricScreen.Song do
 			{:error, err}
 	end
 
-	defp serialize_metadata({key, val}) do
-		Logger.debug(inspect({key, val}))
-		"#{key}: #{val}"
-	defp serialize_metadata({key, val}), do: "#{key}: #{val}"
+	defp serialize_metadata({:meta_named, [name, rest]}) do
+		"#{name}: #{rest}"
+	end
+	defp serialize_metadata({key, val}) when is_binary(val), do: "#{key}: #{val}"
 	defp serialize_metadata(x), do: to_string(x)
 
 	def set_verses(%__MODULE__{} = song, verses), do: %{song | verses: verses} |> save_to_file()
+
+	def new(key, title \\ nil)
+	def new(key, ""), do: new(key, nil)
+	def new(key, nil), do: new(key, key)
+	def new(key, title) when is_binary(key) and is_binary(title) do
+		if F.exists?(key) do
+			{:error, "song_already_exists"}
+		else
+			%__MODULE__{
+				key: key,
+				display_title: title,
+				metadata: [],
+				verses: [],
+			}
+			|> save_to_file()
+		end
+	end
 end

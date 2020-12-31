@@ -16,8 +16,8 @@ config :lyric_screen, LyricScreen.Web.Endpoint,
 config :logger, level: :debug
 
 config :logger, :console,
-	metadata: [:mfa, :line, :level, :time],
-	format: "	=> $metadata\n$message\n\n",
+	metadata: [:mfa, :line, :time],
+	format: "\n[$level] $message\n\t#{IO.ANSI.color(8)}$metadata#{IO.ANSI.reset()}",
 	colors: [enabled: true]
 
 config :phoenix, :json_library, Jason

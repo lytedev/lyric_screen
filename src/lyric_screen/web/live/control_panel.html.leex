@@ -1,9 +1,20 @@
-<div class="flex" id="control-panel">
+<div class="flex" id="control-panel" phx-hook="root" phx-window-keydown="key">
+	<div class="cover show-when-disconnected with-overlay" id="disconnected-notification">
+		<p class="text-center"><i class="material-icons spin">refresh</i></p>
+		<p class="text-center">Reconnecting</p>
+	</div>
 	<%= if @show_sidebar? do %>
 		<div id="sidebar">
 			<header class="flex">
 				<span>Playlist: <%= @playlist.key %></span>
-				<span class="flex-push-right">(<%= @display.current_song_index + 1 %> of <%= Enum.count(@playlist.songs) %> songs)</span>
+				<span class="flex-push-right">
+					<%= if songs(@playlist) == [] do %>
+						(empty)
+					<% else %>
+						(<%= @display.current_song_index + 1 %> of <%= Enum.count(@playlist.songs) %>
+						song<%= if Enum.count(@playlist.songs) > 1, do: "s", else: "" %>)
+					<% end %>
+				</span>
 			</header>
 			<%= if songs(@playlist) == [] do %>
 				<p class="alert info text-center">This playlist is empty! Add some songs!</p>
@@ -13,7 +24,7 @@
 						<li draggable-index="<%= i %>" draggable="true" class="draggable flex<%= if current_song?(@display, i) do %> active<% end %>" id="songlist-<%= i %>">
 							<a phx-click="set_current_song" phx-value-index="<%= i %>"><%= s %></a>
 							<div class="actions">
-								<button class="i" phx-click="remove_song_at" phx-value-index="<%= i %>"><i class="material-icons">remove_circle</i></button>
+								<button title="Remove Song from Playlist" class="i" phx-click="remove_song_at" phx-value-index="<%= i %>"><i class="material-icons">remove_circle</i></button>
 							</div>
 						</li>
 					<% end %>
@@ -21,26 +32,12 @@
 			<% end %>
 
 			<div class="actions flex-push-bottom">
-				<%= if @adding_song? do %>
-					<form class="flex flex-1" phx-submit="add_song" phx-change="suggest_song">
-						<input id="song_searc_input" phx-hook="focus" class="flex-1" list="songs" name="song" autocomplete="off" />
-						<%# <input id="add_song_input" autofocus value="Add Song" type="submit" phx-hook="focus" /> %>
-
-						<datalist id="songs">
-							<%= for s <- @suggested_songs do %>
-								<option value="<%= s %>" />
-							<% end %>
-						</datalist>
-					</form>
-					<button class="i input-overlay" phx-click="cancel_add_song"><i class="material-icons">cancel</i></button>
-				<% else %>
-					<div class="flex">
-						<button class="i" phx-click="add_song" title="Add Song to Playlist"><i class="material-icons">playlist_add</i></button>
-					</div>
-					<div class="flex flex-push-right">
-						<button phx-click="hide_sidebar" class="i" title="Hide Sidebar"><i class="material-icons">menu_open</i></button>
-					</div>
-				<% end %>
+				<div class="flex">
+					<button class="i" phx-click="add_song" title="Add Song to Playlist"><i class="material-icons">playlist_add</i></button>
+				</div>
+				<div class="flex flex-push-right">
+					<button phx-click="hide_sidebar" class="i" title="Hide Sidebar"><i class="material-icons">menu_open</i></button>
+				</div>
 			</div>
 		</div>
 	<% else %>
@@ -49,17 +46,57 @@
 		</div>
 	<% end %>
 
-	<div id="slides" phx-hook="dragdrop" data-group="slides">
-		<%= for {{title, content}, i} <- Enum.with_index(assigns[:slides] || []) do %>
-			<div draggable-index="<%= i - 1 %>" id="slide-<%= i %>" phx-click="set_current_slide" phx-value-index="<%= i %>" draggable="true" class="slide<%= if current_slide?(@display, i) do %> active<% end %><%= if title != "@title" do %> draggable<% end %>">
-				<span class="slide-title"><%= title %></span>
-				<%= content %>
+	<div id="slides-container">
+		<div class="actions">
+			<button id="add-slide-button" phx-click="add_slide" class="i" title="Add Slide"><i class="material-icons">queue_play_next</i></button>
+		</div>
+		<%= if Enum.count(assigns[:slides] || []) > 0 do %>
+			<div id="slides" phx-hook="dragdrop" data-group="slides">
+				<%= for {{title, content}, i} <- Enum.with_index(assigns[:slides] || []) do %>
+					<div draggable-index="<%= i - 1 %>" id="slide-<%= i %>" phx-click="set_current_slide" phx-value-index="<%= i %>" draggable="true" class="slide<%= if current_slide?(@display, i) do %> active<% end %><%= if title != "@title" do %> draggable<% end %>">
+						<span class="slide-title"><%= title %></span>
+						<%= content %>
+					</div>
+				<% end %>
+				<%# <pre><%= inspect(assigns[:slides], pretty: true) </pre> %>
+				<%# <pre><%= inspect(assigns[:song], pretty: true) </pre> %>
+				<%# <pre><%= inspect(assigns[:display], pretty: true) </pre> %>
+				<%# <pre><%= inspect(assigns[:playlist], pretty: true) </pre> %>
+				<%# <pre><%= inspect(@socket, pretty: true) </pre> %>
+			</div>
+		<% else %>
+			<div class="cover flex flex-center flex-col">
+				<i class="material-icons" style="position: relative; left: 0.05em; opacity: 0.5; margin-bottom: 0.5em; font-size: 600%;">nights_stay</i>
+				<p>There's nothing here!</p>
 			</div>
 		<% end %>
-		<%# <pre><%= inspect(assigns[:slides], pretty: true) </pre> %>
-		<%# <pre><%= inspect(assigns[:song], pretty: true) </pre> %>
-		<%# <pre><%= inspect(assigns[:display], pretty: true) </pre> %>
-		<%# <pre><%= inspect(assigns[:playlist], pretty: true) </pre> %>
-		<%# <pre><%= inspect(@socket, pretty: true) </pre> %>
 	</div>
+
+	<%= if @adding_song? do %>
+		<div class="cover with-overlay flex flex-center" phx-submit="add_song" phx-change="suggest_song">
+			<div class="modal">
+				<header>
+					<span class="title">Add Song to Playlist</span>
+				</header>
+				<form class="flex" phx-submit="add_song" phx-change="suggest_song">
+					<input type="hidden" name="add_song_type" />
+					<input id="song_searc_input" placeholder="Start Typing to Search" phx-hook="focus" class="flex-1" list="songs" name="song" autocomplete="off" />
+					<%# <input id="add_song_input" autofocus value="Add Song" type="submit" phx-hook="focus" /> %>
+
+					<datalist id="songs">
+						<%= for s <- @suggested_songs do %>
+							<option value="<%= s %>" />
+						<% end %>
+					</datalist>
+
+					<footer>
+						<input title="Adds the found song to the playlist" <%= if !@add_song_allowed?, do: "disabled", else: "" %> class="primary" type="submit" name="atp" id="songadd_atp" value="Add to Playlist" phx-hook="addsongtype" />
+						<input title="Adds a new song with the current song name" <%= if !@new_song_allowed?, do: "disabled", else: "" %> type="submit" value="New Song" name="newsong" id="songadd_newsong" phx-hook="addsongtype" />
+						<button phx-click="cancel_add_song">Cancel</button>
+					</footer>
+				</form>
+			</div>
+			<button class="i cover-close" phx-click="cancel_add_song"><i class="material-icons">close</i></button>
+		</div>
+	<% end %>
 </div>

@@ -114,6 +114,7 @@ defmodule LyricScreen.Playlist do
 		|> save_to_file()
 	end
 
+	def append_song(%__MODULE__{} = playlist, %Song{key: key}), do: append_song(playlist, key)
 	def append_song(%__MODULE__{songs: songs} = playlist, song_key) do
 		{:ok, all_songs} = Song.File.ls()
 		if song_key in all_songs do
