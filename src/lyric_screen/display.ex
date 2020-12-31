@@ -19,6 +19,8 @@ defmodule LyricScreen.Display.File do
 		end
 	end
 
+	def exists?(key), do: File.exists?(Path.join(dir(), key <> ".txt"))
+
 	def content(f) do
 		ff = Path.join(dir(), f <> ".txt")
 		case File.read(ff) do

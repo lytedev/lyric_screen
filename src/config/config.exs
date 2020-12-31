@@ -22,4 +22,8 @@ config :logger, :console,
 
 config :phoenix, :json_library, Jason
 
-import_config "#{Mix.env()}.exs"
+try do
+	import_config "#{Mix.env()}.exs"
+rescue
+	_ -> :ok
+end

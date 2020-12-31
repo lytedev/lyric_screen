@@ -1,6 +1,8 @@
 defmodule LyricScreen.MixProject do
 	use Mix.Project
 
+	@version "0.1.1"
+
 	@src_path "src"
 	@config_dir_path Path.join(@src_path, "config")
 	@config_path Path.join(@config_dir_path, "config.exs")
@@ -30,22 +32,21 @@ defmodule LyricScreen.MixProject do
 	def docs, do: [output: @docs_path]
 
 	def releases, do: [
-		lytedev: [
+		lyric_screen: [
 			include_executables_for: [:unix],
 			applications: [runtime_tools: :permanent],
 			strip_beams: true,
 			path: Path.join(@build_path, "rel"),
 			include_erts: true,
 			rel_templates_path: Path.join(@src_path, "rel"),
-			# overlays: ["src/static"],
 			steps: [:assemble],
-			runtime_config_path: Path.join(@src_path, "release.exs"),
+			runtime_config_path: Path.join(@config_dir_path, "release.exs"),
 		],
 	]
 
 	def project, do: [
 		app: :lyric_screen,
-		version: "0.1.0",
+		version: @version,
 		elixir: "~> 1.7",
 		elixirc_paths: elixirc_paths(Mix.env()),
 		config_path: @config_path,

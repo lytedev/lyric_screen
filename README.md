@@ -1,18 +1,48 @@
 # LyricScreen
 
-To start your Phoenix server:
+SaaS for managing live performance lyrics.
 
-	* Install dependencies with `mix deps.get`
-	* Start Phoenix endpoint with `mix phx.server`
+## Setup
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+```bash
+mix deps.get
+```
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+## Develop
 
-## Learn more
+```bash
+iex -S mix phx.server
+```
 
-	* Official website: https://www.phoenixframework.org/
-	* Guides: https://hexdocs.pm/phoenix/overview.html
-	* Docs: https://hexdocs.pm/phoenix
-	* Forum: https://elixirforum.com/c/phoenix-forum
-	* Source: https://github.com/phoenixframework/phoenix
+## Lint
+
+```bash
+mix dialyzer
+mix credo --strict
+```
+
+## Test
+
+```bash
+mix test
+```
+
+## Generate Release
+
+```bash
+MIX_ENV=prod mix release
+```
+
+## Deploy
+
+Generate a release first.
+
+```bash
+rsync -r build/rel/ $YOUR_HOST:~/my-app
+ssh $YOUR_HOST \
+	HOST=lyricscreen.com \
+	PORT=80 \
+	SECRET_KEY_BASE=$(pass lyricscreen.com/skb) \
+	LIVE_VIEW_SALT=$(pass lyricscreen.com/lvs) \
+	~/my-app/bin/lyric_screen daemon
+```

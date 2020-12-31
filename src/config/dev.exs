@@ -5,9 +5,7 @@ config :lyric_screen, LyricScreen.Web.Endpoint,
 	debug_errors: true,
 	code_reloader: true,
 	check_origin: false,
-	watchers: []
-
-config :lyric_screen, LyricScreen.Web.Endpoint,
+	watchers: [],
 	live_reload: [
 		patterns: [
 			~r"src/priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
