@@ -18,7 +18,7 @@ defmodule LyricScreen.Web.Endpoint do
 
 	plug Plug.Static,
 		at: "/",
-		from: "src/priv/static",
+		from: :lyric_screen,
 		gzip: false,
 		only: ~w(css fonts images js favicon.ico robots.txt)
 

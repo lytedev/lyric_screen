@@ -4,6 +4,7 @@ defmodule LyricScreen.MixProject do
 	@version "0.1.1"
 
 	@src_path "src"
+	@priv_path Path.join(@src_path, "priv")
 	@config_dir_path Path.join(@src_path, "config")
 	@config_path Path.join(@config_dir_path, "config.exs")
 	@test_path Path.join(@src_path, "test")
@@ -39,8 +40,7 @@ defmodule LyricScreen.MixProject do
 			path: Path.join(@build_path, "rel"),
 			include_erts: true,
 			rel_templates_path: Path.join(@src_path, "rel"),
-			steps: [&coalesce_static/1, :assemble],
-			# overlays: ["src/priv/static"],
+			steps: [&copy_priv/1, :assemble],
 			runtime_config_path: Path.join(@config_dir_path, "release.exs"),
 		],
 	]
@@ -69,14 +69,11 @@ defmodule LyricScreen.MixProject do
 	defp elixirc_paths(:test), do: elixirc_paths(nil) ++ [Path.join(@test_path, "support")]
 	defp elixirc_paths(_), do: [@src_path]
 
-	def coalesce_static(r) do
-		IO.inspect(r, label: "release")
-		p = "src/priv/static"
-		d = Path.join([r.path, p])
+	def copy_priv(r) do
+		d = Path.join([Application.app_dir(:lyric_screen), "src/priv"])
+		File.rm_rf!(d)
 		File.mkdir_p!(d)
-		File.cp_r!(p, d)
-		|> IO.inspect()
-		IO.inspect(File.ls!(r.path))
+		File.cp_r!(@priv_path, d, fn (_, _) -> true end)
 		r
 	end
 end
