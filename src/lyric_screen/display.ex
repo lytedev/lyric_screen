@@ -77,6 +77,15 @@ defmodule LyricScreen.Display do
 
 	def playlist(%__MODULE__{playlist: playlist}), do: Playlist.load_from_file(playlist)
 
+	def songs(%__MODULE__{} = display) do
+		case playlist(display) do
+			{:ok, playlist} -> Playlist.songs(playlist)
+			err ->
+				Logger.error(inspect(err))
+				err
+		end
+	end
+
 	def current_song(%__MODULE__{current_song_index: i} = display) do
 		case playlist(display) do
 			{:ok, playlist} -> Playlist.song_at(playlist, i)
@@ -88,7 +97,16 @@ defmodule LyricScreen.Display do
 
 	def current_slides(%__MODULE__{} = display) do
 		case current_song(display) do
-			{:ok, song} -> Song.map(song)
+			{:ok, song} -> {:ok, Song.map(song)}
+			err ->
+				Logger.error(inspect(err))
+				err
+		end
+	end
+
+	def current_slide(%__MODULE__{current_slide_index: i} = display) do
+		case current_slides(display) do
+			{:ok, slides} -> {:ok, Enum.at(slides, i)}
 			err ->
 				Logger.error(inspect(err))
 				err
@@ -120,7 +138,9 @@ defmodule LyricScreen.Display do
     s = display.current_song_index
 		Logger.debug("Setting Current Slide Index: #{i}")
 		old_display = display
-		num_slides = display |> current_slides() |> Enum.count()
+		# TODO: rescue
+		{:ok, slides} = current_slides(display)
+		num_slides = slides |> Enum.count()
     num_songs =
 			case playlist(display) do
 				{:ok, playlist} -> Enum.count(playlist.songs)

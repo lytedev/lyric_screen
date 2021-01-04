@@ -19,10 +19,11 @@ defmodule LyricScreen.Web.Router do
 		pipe_through :browser
 
 		get "/", PageController, :index
+		get "/status", PageController, :status
 		live "/clock", Live.Clock
 		live "/dashboard", Live.Dashboard
 		get "/display/controls/:id", DisplayController, :show_control_panel
-		get "/display/:id", DisplayController, :show_control_panel
+		get "/display/:id", DisplayController, :show_basic_lyrics
 	end
 
 	# Other scopes may use custom stacks.

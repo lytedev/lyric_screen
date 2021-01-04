@@ -17,7 +17,7 @@
 				</span>
 			</header>
 			<%= if songs(@playlist) == [] do %>
-				<p class="alert info text-center">This playlist is empty! Add some songs!</p>
+				<p class="alert info text-center">This playlist is empty! Add some songs using the icon on the bottom-left of this sidebar.</p>
 			<% else %>
 				<ul id="songlist" phx-hook="dragdrop" data-group="song">
 					<%= for {s, i} <- Enum.with_index(songs(@playlist)) do %>
@@ -25,6 +25,7 @@
 							<a phx-click="set_current_song" phx-value-index="<%= i %>"><%= s %></a>
 							<div class="actions">
 								<button title="Remove Song from Playlist" class="i" phx-click="remove_song_at" phx-value-index="<%= i %>"><i class="material-icons">remove_circle</i></button>
+								<button title="Drag to Re-order Song" class="i handle"><i class="material-icons">drag_handle</i></button>
 							</div>
 						</li>
 					<% end %>
@@ -36,6 +37,7 @@
 					<button class="i" phx-click="add_song" title="Add Song to Playlist"><i class="material-icons">playlist_add</i></button>
 				</div>
 				<div class="flex flex-push-right">
+					<a href="/" class="button i" title="Go to Index"><i class="material-icons">home</i></a>
 					<button phx-click="hide_sidebar" class="i" title="Hide Sidebar"><i class="material-icons">menu_open</i></button>
 				</div>
 			</div>
@@ -55,7 +57,10 @@
 				<%= for {{title, content}, i} <- Enum.with_index(assigns[:slides] || []) do %>
 					<div draggable-index="<%= i - 1 %>" id="slide-<%= i %>" phx-click="set_current_slide" phx-value-index="<%= i %>" draggable="true" class="slide<%= if current_slide?(@display, i) do %> active<% end %><%= if title != "@title" do %> draggable<% end %>">
 						<span class="slide-title"><%= title %></span>
-						<%= content %>
+						<span class="slide-content"><%= content %></span>
+						<div class="actions">
+							<%= if title != "@title" do %><button title="Drag to Re-order Slide" class="i handle"><i class="material-icons">drag_handle</i></button><% end %>
+						</div>
 					</div>
 				<% end %>
 				<%# <pre><%= inspect(assigns[:slides], pretty: true) </pre> %>
@@ -65,9 +70,9 @@
 				<%# <pre><%= inspect(@socket, pretty: true) </pre> %>
 			</div>
 		<% else %>
-			<div class="cover flex flex-center flex-col">
+			<div class="flex flex-center flex-col cover" style="z-index:0">
 				<i class="material-icons" style="position: relative; left: 0.05em; opacity: 0.5; margin-bottom: 0.5em; font-size: 600%;">nights_stay</i>
-				<p>There's nothing here!</p>
+				<p style="text-align:center">There's nothing here!</p>
 			</div>
 		<% end %>
 	</div>

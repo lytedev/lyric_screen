@@ -14,6 +14,7 @@ let hooks = {
 			const hook = this
 			console.log('drag_and_drop mounted', this, a, b, c)
 			let s = new Sortable(this.el, {
+				handle: '.handle',
 				animation: 0,
 				delay: 50,
 				delayOnTouchOnly: true,

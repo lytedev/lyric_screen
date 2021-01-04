@@ -266,7 +266,7 @@ defmodule LyricScreen.Web.Live.ControlPanel do
     #{:noreply, assign(socket, suggested_songs: suggested_songs)}
 		exists? = Song.File.exists?(search_term)
 		new_song_allowed? = search_term != "" && !exists?
-		add_song_allowed? = exists?
+		add_song_allowed? = search_term != "" && exists?
 		Logger.debug(inspect({search_term, exists?, new_song_allowed?, add_song_allowed?}))
 		{:noreply,
 			socket

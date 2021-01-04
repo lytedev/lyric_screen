@@ -1,18 +1,141 @@
-<h1><%= gettext "Welcome to %{name}!", name: "LyricScreen" %></h1>
+<style>
+#index {
+	max-width: 400px;
+	margin: 0 auto;
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
 
-<h2>Manage</h2>
-<ul>
-	<li>
-		<a href="/display/controls/default">Default Control Panel</a>
-	</li>
-	<li>
-		<a href="/display/default">Default Display (WIP)</a>
-	</li>
-</ul>
+h1 {
+	font-size: 24px;
+	text-align: center;
+	padding: 1em;
+}
 
-<h2>Admin</h2>
-<ul>
-	<li>
-		<a href="/admin/live-dashboard">Live Dashboard</a>
-	</li>
-</ul>
+#ls-version-info {
+	padding: 2em;
+	opacity: 0.25;
+	font-family: var(--mf);
+	text-align: center;
+}
+
+.card-container {
+	display: flex;
+	list-style: none;
+}
+
+.card-container .card {
+	flex: 1 1 0;
+}
+
+.card:first-of-type {
+	margin-left: 0.25em;
+}
+
+.card {
+	text-decoration: none;
+	color: var(--fg);
+	display: block;
+	text-align: center;
+	margin: 0.25em;
+	margin-left: 0;
+	border-radius: 0.5em;
+	border: solid 1px #666;
+	background-color: rgba(255, 255, 255, 0.05);
+	padding: 1em;
+	transition: background-color 0.2s ease;
+	font-size: 12px;
+}
+
+.card > span {
+	display: block;
+	white-space: pre;
+}
+
+.card:hover {
+	background-color: rgba(255, 255, 255, 0.1);
+}
+
+.card > i.material-icons {
+	display: block;
+	font-size: 300%;
+	margin-bottom: 0.10em;
+}
+
+#status {
+	margin: 0.25em;
+	flex: 1;
+	max-width: 600px;
+	border: solid 1px #666;
+	background-color: rgba(255, 255, 255, 0.025);
+	padding: 0.5em;
+	border-radius: 0.5em;
+	margin-top: 0;
+}
+
+h2, h3, h4, h5, h6 {
+	margin-top: 1em;
+	margin-bottom: 0.5em;
+}
+
+#status ul {
+	padding-left: 1em;
+}
+
+#status p {
+	margin-top: 1em;
+}
+</style>
+
+<div id="index">
+	<h1><%= gettext "Welcome to %{name}!", name: "LyricScreen" %> 🎉</h1>
+	<div class="flex flex-col">
+		<div class="card-container">
+			<a href="/display/controls/default" class="card">
+				<i class="material-icons">important_devices</i>
+				<span>Control Panel</span>
+			</a>
+			<a href="/display/default" target="_blank" class="card">
+				<i class="material-icons">input</i>
+				<span>Display</span>
+			</a>
+			<a href="/admin/live-dashboard" class="card">
+				<i class="material-icons">auto_graph</i>
+				<span>Live Dashboard</span>
+			</a>
+		</div>
+		<div id="status">
+			<h2 class="flex" style="margin-top: 0">Status <span class="success flex-push-right">✅</span></h2>
+			<h3>To Do (for v1.0)</h3>
+			<ul>
+				<li>Controls for hotkey functions</li>
+				<li>Pause and freeze functionality</li>
+				<li>Slide editing controls</li>
+				<li>Display slide fade transitions</li>
+				<li>Song deletion</li>
+				<li>Playlist, song, and display management</li>
+				<li>Image backgrounds</li>
+				<!-- Long term goals should go in the readme -->
+			</ul>
+			<h3>Bugs</h3>
+			<ul>
+				<li>✅ None known yet!</li>
+			</ul>
+			<p class="text-center">
+				Find a bug? Have a feature request? Email me at <a href="mailto:daniel@lyte.dev">daniel@lyte.dev</a>
+			</p>
+		</div>
+	</div>
+	<span id="ls-version-info">v<%=
+		[
+			:application.get_key(:lyric_screen, :vsn) |> elem(1),
+			Application.get_env(:lyric_screen, :version_git_rev),
+			Application.get_env(:lyric_screen, :version_git_branch),
+			Application.get_env(:lyric_screen, :compiled_at) |> NaiveDateTime.to_date(),
+			Application.get_env(:lyric_screen, :compiled_at) |> NaiveDateTime.truncate(:second) |> NaiveDateTime.to_time(),
+		] |> Enum.join("-")
+	%></span>
+</div>
+

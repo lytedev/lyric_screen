@@ -5,6 +5,7 @@
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
+	scrollbar-width: none !important;
 }
 
 :root {
@@ -34,11 +35,16 @@ a {
 	color: var(--lc);
 }
 
+a.button {
+	color: inherit;
+	text-decoration: none;
+}
+
 h1 {
 	margin: 0.25rem;
 }
 
-input, button {
+input, button, button {
 	background: rgba(255,255,255,0.1);
 	border: none;
 	font: inherit;
@@ -49,18 +55,25 @@ input, button {
 	padding: 0.5em;
 }
 
-button, input[type=submit] { cursor: pointer; }
+.button, button, input[type=submit] { cursor: pointer; }
 
+.button.primary,
 input[type=submit].primary,
 button.primary {
 	background: var(--lcp);
 }
 
+.success {
+	color: #4f8;
+}
+
+.button.error,
 input[type=submit].error,
 button.error {
 	background: var(--cerrp);
 }
 
+.button:disabled,
 input[type=submit]:disabled,
 button:disabled {
 	color: #888;
@@ -68,6 +81,7 @@ button:disabled {
 	cursor: not-allowed;
 }
 
+.button > i.material-icons,
 button > i.material-icons {
 	display: flex;
 	justify-content: center;
@@ -118,6 +132,7 @@ body.phx-disconnected .show-when-disconnected {
 	margin: 0;
 }
 
+.button.i,
 button.i {
 	background: transparent;
 	padding-top: 0.36em;
@@ -174,6 +189,7 @@ button.i {
 	padding: 0.5em;
 }
 
+.modal .input,
 .modal input,
 .modal button {
 	margin: 0;
@@ -191,9 +207,15 @@ button.i {
 	margin-top: 1em;
 }
 
+.modal footer .button,
 .modal footer input[type=submit],
 .modal footer button {
 	margin-left: 0.25em;
+}
+
+#control-panel {
+	height: 100vh;
+	overflow-y: hidden;
 }
 
 #disconnected-notification {
@@ -215,8 +237,9 @@ button.i {
 	justify-content: flex-start;
 	position: relative;
 	width: 320px;
+	max-width: 75vw;
 	height: 100vh;
-	overflow-x: scroll;
+	overflow: hidden;
 	box-shadow: -1px 0px 10px rgba(0, 0, 0, 0.5);
 	background-color: rgba(255, 255, 255, 0.015);
 }
@@ -259,12 +282,14 @@ button.i {
 	background-color: rgba(255, 255, 255, 0.05);
 }
 
+#songlist li .button,
 #songlist li button {
 }
 
 #songlist li {
 	position: relative;
 }
+
 #songlist li .actions {
 	z-index: 10;
 	position: absolute;
@@ -276,19 +301,23 @@ button.i {
 	align-items: center;
 }
 
-#songlist li .actions button.i {
+#slides .slide .actions .button,
+#slides .slide .actions button,
+#songlist .actions button {
 	margin: 0;
 	padding: 0;
 	opacity: 0.25;
 	transition: opacity 0.2s ease;
 }
 
-#songlist li .actions button.i:hover {
+#slides .slide .actions .button:hover,
+#slides .slide .actions button:hover,
+#songlist .actions button:hover {
 	opacity: 1;
 }
 
-#songlist li.draggable-ghost {
-	opacity: 0.75;
+.draggable-ghost {
+	opacity: 0.5;
 }
 
 #sidebar > .actions {
@@ -298,21 +327,39 @@ button.i {
 	align-items: center;
 }
 
+#slides .slide .actions {
+	z-index: 10;
+	position: absolute;
+	right: 0em;
+	top: 0em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
 #show-sidebar-button {
 	position: absolute;
 	bottom: 0;
 	left: 0;
 	padding-bottom: 0.8em;
+	z-index: 5;
 }
 
 #slides-container {
+	display: flex;
+	flex-direction: column;
 	flex: 1;
 	position: relative;
+	height: 100vh;
+}
+
+#slides-container .actions {
+	padding-top: 0.25em;
 }
 
 #slides {
-	overflow-y: auto;
-	max-height: 100vh;
+	overflow-x: hidden;
+	overflow-y: scroll;
 	padding: 0.5em;
 	display: flex;
 	flex-wrap: wrap;
@@ -337,8 +384,11 @@ button.i {
 	align-items: center;
 	text-align: center;
 	cursor: pointer;
-	white-space: pre-wrap;
 	transition: border 0.2s ease;
+}
+
+#slides .slide .slide-content {
+	white-space: pre-wrap;
 }
 
 #slides .slide:hover {
@@ -363,6 +413,21 @@ button.i {
 	font-weight: 700;
 }
 
+#slides .slide .actions {
+	padding-right: 0.5em;
+}
+
+#slides .slide .actions .button,
+#slides .slide .actions button {
+	opacity: 0.25;
+	transition: opacity 0.2s ease
+}
+
+#slides .slide .actions .button:hover,
+#slides .slide .actions button:hover {
+	opacity: 1;
+}
+
 @media (min-width: 800px) {
 	@keyframes actions-slide-left {
 		0% {
@@ -374,6 +439,14 @@ button.i {
 			right: 0.5em;
 			opacity: 1;
 		}
+	}
+
+	#slides .slide .actions {
+		display: none !important;
+	}
+
+	#slides .slide:hover .actions {
+		display: inherit !important;
 	}
 
 	.hoverable .show-on-hover {
