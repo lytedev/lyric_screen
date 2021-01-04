@@ -16,9 +16,11 @@ defmodule LyricScreen.Web.Endpoint do
 
 	socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
+	static_path = Application.get_env(:lyric_screen, __MODULE__)[:static_files_path]
+	IO.puts(["Static Path: ", inspect(static_path)])
 	plug Plug.Static,
 		at: "/",
-		from: :lyric_screen,
+		from: static_path,
 		gzip: false,
 		only: ~w(css fonts images js favicon.ico robots.txt)
 

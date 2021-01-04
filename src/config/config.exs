@@ -11,7 +11,8 @@ config :lyric_screen, LyricScreen.Web.Endpoint,
 	secret_key_base: "vqQv2ePi+neCxN9s7bwj508kWY06T7y4mijCyBrCz+xyXV/ozuHOMsSeNZ7OljJ9",
 	render_errors: [view: LyricScreen.Web.ErrorView, accepts: ~w(html json), layout: false],
 	pubsub_server: LyricScreen.PubSub,
-	live_view: [signing_salt: "cmoCWK8M"]
+	live_view: [signing_salt: "cmoCWK8M"],
+	static_files_path: "src/priv/static"
 
 config :logger, level: :debug
 

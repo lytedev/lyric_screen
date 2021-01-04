@@ -38,11 +38,11 @@ MIX_ENV=prod mix release
 Generate a release first.
 
 ```bash
-rsync -r build/rel/ $YOUR_HOST:~/my-app
+rsync -IPr build/rel/ $YOUR_HOST:~/my-app
 ssh $YOUR_HOST \
 	HOST=lyricscreen.com \
 	PORT=80 \
-	SECRET_KEY_BASE=$(pass lyricscreen.com/skb) \
-	LIVE_VIEW_SALT=$(pass lyricscreen.com/lvs) \
+	SECRET_KEY_BASE=$(pass servers/lyricscreen/secret-key-base) \
+	LIVE_VIEW_SALT=$(pass servers/lyricscreen/live-view-salt) \
 	~/my-app/bin/lyric_screen daemon
 ```

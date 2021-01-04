@@ -19,7 +19,6 @@ lv_salt = System.fetch_env!("LIVE_VIEW_SALT")
 IO.puts("configuration, baby: #{inspect({port, host})}")
 
 config :lyric_screen, LyricScreen.Web.Endpoint,
-	static_files_path: "priv/static",
 	url: [
 		# scheme: "http",
 		host: host,
