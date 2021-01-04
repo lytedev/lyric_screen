@@ -1,8 +1,7 @@
 defmodule LyricScreen.MixProject do
 	use Mix.Project
 
-	@version "0.4.0"
-	@build_date "0.4.0"
+	@version "0.4.2"
 
 	@src_path "src"
 	@priv_path Path.join(@src_path, "priv")
@@ -41,7 +40,7 @@ defmodule LyricScreen.MixProject do
 			path: Path.join(@build_path, "rel"),
 			include_erts: true,
 			rel_templates_path: Path.join(@src_path, "rel"),
-			steps: [&copy_priv/1, :assemble],
+			steps: [&copy_static/1, :assemble],
 			runtime_config_path: Path.join(@config_dir_path, "release.exs"),
 		],
 	]
@@ -70,11 +69,12 @@ defmodule LyricScreen.MixProject do
 	defp elixirc_paths(:test), do: elixirc_paths(nil) ++ [Path.join(@test_path, "support")]
 	defp elixirc_paths(_), do: [@src_path]
 
-	def copy_priv(r) do
-		d = Path.join([Application.app_dir(:lyric_screen), "src/priv"])
+	def copy_static(r) do
+		d = Path.join([Application.app_dir(:lyric_screen), "priv/static"])
+		IO.puts("Copying priv to #{Mix.env()} application build: #{d}")
 		File.rm_rf!(d)
 		File.mkdir_p!(d)
-		File.cp_r!(@priv_path, d, fn (_, _) -> true end)
+		File.cp_r!(Path.join(@priv_path, "static"), d, fn (_, _) -> true end)
 		r
 	end
 end

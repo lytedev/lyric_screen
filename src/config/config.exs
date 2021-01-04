@@ -1,6 +1,7 @@
 use Mix.Config
 
 config :lyric_screen, compiled_at: DateTime.utc_now()
+config :lyric_screen, env: Mix.env()
 
 git_rev =
 	case System.cmd("git", ~w{rev-parse --short HEAD}) do

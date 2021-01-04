@@ -20,8 +20,10 @@ defmodule LyricScreen.Web.Live.BasicLyrics do
 	end
 
 	def set_slide_contents(socket) do
-		{:ok, {_title, contents}} = Display.current_slide(socket.assigns.display)
-		assign(socket, current_slide_contents: contents)
+		case Display.current_slide(socket.assigns.display) do
+			{:ok, {_title, contents}} -> assign(socket, current_slide_contents: contents)
+			_ -> assign(socket, current_slide_contents: "")
+		end
 	end
 
   @sync_all_keys [:display]

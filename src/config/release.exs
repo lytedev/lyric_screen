@@ -2,14 +2,16 @@ import Config
 
 app_dir = Application.app_dir(:lyric_screen)
 app_subdir = fn (s) -> Path.join(app_dir, s) end
-config :lyric_screen,
-	chats_dir: app_subdir.("priv/data/chats"),
-	playlists_dir: app_subdir.("priv/data/playlists"),
-	displays_dir: app_subdir.("priv/data/displays"),
-	songs_dir: app_subdir.("priv/data/songs")
 
 str = fn (s, default) -> s |> System.get_env(default) end
+path = fn (s, default) -> str.(s, default) |> Path.expand() end
 int = fn (s, default) -> s |> str.(Integer.to_string(default)) |> String.to_integer() || default end
+
+config :lyric_screen,
+	chats_dir: path.("CHATS_DIR", app_subdir.("priv/data/chats")),
+	playlists_dir: path.("PLAYLISTS_DIR", app_subdir.("priv/data/playlists")),
+	displays_dir: path.("DISPLAYS_DIR", app_subdir.("priv/data/displays")),
+	songs_dir: path.("SONGS_DIR", app_subdir.("priv/data/songs"))
 
 port = int.("PORT", 8899)
 host = str.("HOST", "lyricscreen.com")

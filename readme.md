@@ -35,14 +35,6 @@ MIX_ENV=prod mix release
 
 ## Deploy
 
-Generate a release first.
-
-```bash
-rsync -IPr build/rel/ $YOUR_HOST:~/my-app
-ssh $YOUR_HOST \
-	HOST=lyricscreen.com \
-	PORT=80 \
-	SECRET_KEY_BASE=$(pass servers/lyricscreen/secret-key-base) \
-	LIVE_VIEW_SALT=$(pass servers/lyricscreen/live-view-salt) \
-	~/my-app/bin/lyric_screen daemon
+```
+./src/priv/script/deploy.sh
 ```

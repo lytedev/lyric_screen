@@ -101,10 +101,12 @@ h2, h3, h4, h5, h6 {
 				<i class="material-icons">input</i>
 				<span>Display</span>
 			</a>
-			<a href="/admin/live-dashboard" class="card">
-				<i class="material-icons">auto_graph</i>
-				<span>Live Dashboard</span>
-			</a>
+			<%= if Application.get_env(:lyric_screen, :env) in [:dev, :test] do %>
+				<a href="/admin/live-dashboard" class="card">
+					<i class="material-icons">auto_graph</i>
+					<span>Live Dashboard</span>
+				</a>
+			<% end %>
 		</div>
 		<div id="status">
 			<h2 class="flex" style="margin-top: 0">Status <span class="success flex-push-right">✅</span></h2>
