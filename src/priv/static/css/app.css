@@ -44,7 +44,8 @@ h1 {
 	margin: 0.25rem;
 }
 
-input, button, button {
+input, button, button, textarea {
+	transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 	background: rgba(255,255,255,0.1);
 	border: none;
 	font: inherit;
@@ -55,7 +56,9 @@ input, button, button {
 	padding: 0.5em;
 }
 
-.button, button, input[type=submit] { cursor: pointer; }
+.button, button, input[type=submit] {
+	cursor: pointer;
+}
 
 .button.primary,
 input[type=submit].primary,
@@ -191,6 +194,7 @@ button.i {
 
 .modal .input,
 .modal input,
+.modal textarea,
 .modal button {
 	margin: 0;
 }
@@ -213,6 +217,33 @@ button.i {
 	margin-left: 0.25em;
 }
 
+.tabs {
+	display: flex;
+}
+
+.tabs .button.tab,
+.tabs button.tab,
+.tabs .tab {
+	flex: 1;
+	margin: 0;
+	border-radius: 0;
+	background: transparent;
+	border-bottom: solid 3px transparent;
+	transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.tabs .button.tab:hover,
+.tabs button.tab:hover,
+.tabs .tab:hover {
+	background-color: rgba(255, 255, 255, 0.05);
+}
+
+.tabs .button.tab.active,
+.tabs button.tab.active,
+.tabs .tab.active {
+	border-bottom-color: var(--lc);
+}
+
 #control-panel {
 	height: 100vh;
 	overflow-y: hidden;
@@ -231,6 +262,7 @@ button.i {
 }
 
 #sidebar {
+	z-index: 20;
 	flex-shrink: 0;
 	display: flex;
 	flex-direction: column;
@@ -354,13 +386,18 @@ button.i {
 }
 
 #slides-container .actions {
-	padding-top: 0.25em;
+	padding: 0.25em 0;
+	box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.5);
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(255, 255, 255, 0.025);
 }
 
 #slides {
 	overflow-x: hidden;
 	overflow-y: scroll;
-	padding: 0.5em;
+	padding: 1em;
+	padding-bottom: 9em;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
@@ -465,5 +502,12 @@ button.i {
 	#songlist li:hover .actions {
 		animation: actions-slide-left 0.5s ease;
 		animation-fill-mode: forwards;
+	}
+
+	#slides-container .actions {
+		padding: 0.25em 0;
+		box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.5);
+		justify-content: flex-start;
+		align-items: center;
 	}
 }

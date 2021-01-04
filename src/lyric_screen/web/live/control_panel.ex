@@ -15,21 +15,50 @@ defmodule LyricScreen.Web.Live.ControlPanel do
     {:ok,
       socket
 			|> load_all_songs()
+			|> close_all_modals()
 			|> assign(
-				in_modal?: false,
-				adding_song?: false,
 				search_test: "",
 				show_sidebar?: true,
+
+				# modal stuff
 				new_song_allowed?: false,
-				add_song_allowed?: false
+				add_song_allowed?: false,
+				add_slide_type: "bare",
+				add_slide_valid?: false
 			)
       |> load_display(session["display"])
     }
 	end
 
+	def close_all_modals(socket) do
+		assign(socket,
+			in_modal?: false,
+			adding_song?: false,
+			adding_slide?: false,
+			editing_slide?: false
+		)
+	end
+
+	def terminate(reason, socket) do
+		Logger.info("Control Panel LiveView Terminated: #{inspect(socket)}}#{inspect(reason)}")
+		:ok
+	end
+
 	def current_song(socket), do: Display.current_song(socket.assigns.display)
 	def current_playlist(socket), do: Display.playlist(socket.assigns.display)
+	# TODO: add slide events need to have a song bound to them to prevent adding to a song after it changes and we add to the wrong song
+	def show_add_slide_form(socket), do: assign(socket, adding_slide?: true, in_modal?: true, add_slide_type: "bare")
+	def set_add_slide_type(socket, type), do: assign(socket, add_slide_type: type) |> check_add_slide_valid()
 	def show_add_song_form(socket), do: assign(socket, adding_song?: true, in_modal?: true)
+
+	def check_add_slide_valid(socket) do
+		Logger.warn(inspect(socket.assigns.add_slide_type))
+		if socket.assigns.add_slide_type == "repeat" do
+			assign(socket, add_slide_valid?: true)
+		else
+			assign(socket, add_slide_valid?: false)
+		end
+	end
 
 	def load_display(socket, display_id) do
 		Logger.debug("Loading Display: #{display_id}")
@@ -245,6 +274,8 @@ defmodule LyricScreen.Web.Live.ControlPanel do
     }
   end
 
+	def handle_event("set_add_slide_type", %{"slide-type" => type}, socket), do: {:noreply, set_add_slide_type(socket, type)}
+
 	def handle_event("set_current_slide", %{"index" => index}, socket) do
     i = String.to_integer(index)
 		cond do
@@ -277,15 +308,55 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 		}
   end
 
-	def handle_event("cancel_add_song", _, socket) do
-		{:noreply, assign(socket, adding_song?: false, in_modal?: false)}
+	def handle_event("cancel_add_song", _, socket), do: {:noreply, close_all_modals(socket)}
+	def handle_event("cancel_add_slide", _, socket), do: {:noreply, close_all_modals(socket)}
+	def handle_event("begin_add_slide", _, socket), do: {:noreply, show_add_slide_form(socket)}
+
+	def handle_event("add_slide", %{type: "bare", content: content}, socket) do
+		{:noreply, show_add_slide_form(socket)}
 	end
 
+	def handle_event("copy_slide", %{"at" => str_at}, socket) do
+    at = String.to_integer(str_at)
+		case current_song(socket) do
+			{:ok, song} ->
+				{:noreply,
+					song.verses
+					|> Enum.at(at)
+					|> case do
+						nil -> socket
+						%SongVerse{type: :bare} = sv -> set_current_song_verses(socket, List.insert_at(song.verses, at, sv))
+						%SongVerse{type: :ref} = sv -> set_current_song_verses(socket, List.insert_at(song.verses, at, sv))
+						%SongVerse{type: :named, key: key} -> set_current_song_verses(socket, List.insert_at(song.verses, at, %SongVerse{type: :ref, key: key}))
+					end
+				}
+			err ->
+				Logger.error(inspect(err))
+				{:noreply, socket}
+		end
+	end
+
+	# TODO: Add an "are you sure" if the verse is a named verse?
+	def handle_event("remove_slide", %{"at" => str_at}, socket) do
+    at = String.to_integer(str_at)
+		case current_song(socket) do
+			{:ok, song} ->
+				{:noreply, set_current_song_verses(socket, List.delete_at(song.verses, at))}
+			err ->
+				Logger.error(inspect(err))
+				{:noreply, socket}
+		end
+	end
+
+	# TODO: add_song events need to have the playlist bound to the form/event so that if the playlist changes from underneath, we won't add the song to the newly active playlist
+	# maybe this is actually expected functinality?
+	# Needs thought
   def handle_event("add_song", %{"song" => song_name, "add_song_type" => "newsong"}, socket) do
 		{:ok, song} = Song.new(song_name)
     {:ok, playlist} = Playlist.append_song(socket.assigns.playlist, song)
     socket
-    |> assign(playlist: playlist, adding_song?: false, in_modal?: false)
+    |> assign(playlist: playlist)
+		|> close_all_modals()
 		|> set_current_slide(0)
     |> set_current_song_and_load(Enum.count(playlist.songs))
     |> simple_sync_event()
@@ -298,7 +369,7 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 		Logger.warn(inspect(arg))
 		{:noreply,
 			socket
-			|> assign(adding_song?: false, in_modal?: false)
+			|> close_all_modals()
 			|> add_song_to_playlist(song)
 			|> send_sync_all()
 		}
@@ -329,13 +400,36 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 		end
 	end
 
+	def handle_event("toggle_hidden", _path, socket) do
+    {:ok, display} = Display.toggle_hidden(socket.assigns.display)
+    {:noreply,
+      socket
+			|> assign(display: display)
+      |> send_sync_all()
+		}
+	end
+
+	def handle_event("toggle_frozen", _path, socket) do
+    {:ok, display} = Display.toggle_frozen(socket.assigns.display)
+    {:noreply,
+      socket
+			|> assign(display: display)
+      |> send_sync_all()
+		}
+	end
+
+	def handle_event("toggle_freeze", _path, socket), do: {:noreply, socket}
+
 	def handle_event("nav", _path, socket), do: {:noreply, socket}
 	def handle_event("hide_sidebar", _path, socket), do: {:noreply, assign(socket, show_sidebar?: false)}
 	def handle_event("show_sidebar", _path, socket), do: {:noreply, assign(socket, show_sidebar?: true)}
 
   def handle_event("key", _, %{assigns: %{in_modal?: true}} = socket), do: {:noreply, socket}
 
-  def handle_event("key", %{"key" => "Escape"}, %{assigns: %{adding_song?: true}} = socket), do: handle_event("cancel_add_song", %{}, socket)
+	def handle_event("key", %{"key" => " "}, socket), do: handle_event("toggle_hidden", %{}, socket)
+	def handle_event("key", %{"key" => "f"}, socket), do: handle_event("toggle_frozen", %{}, socket)
+
+  def handle_event("key", %{"key" => "Escape"}, %{assigns: %{in_modal?: true}} = socket), do: {:noreply, close_all_modals(socket)}
 
   def handle_event("key", %{"ctrlKey" => true, "shiftKey" => false, "key" => "ArrowUp"}, socket), do: handle_event("prev_song", %{}, socket)
   def handle_event("key", %{"ctrlKey" => true, "shiftKey" => false, "key" => "ArrowLeft"}, socket), do: handle_event("prev_song", %{}, socket)

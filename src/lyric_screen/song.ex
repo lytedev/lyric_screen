@@ -165,6 +165,10 @@ defmodule LyricScreen.Song do
 	def load_from_string(str), do: F.data(str) |> do_load()
 	def load_from_file(title), do: F.file_data(title) |> do_load(title)
 
+	def named_slides(%__MODULE__{verses: verses}) do
+		Enum.filter(verses, &(&1.type == :named))
+	end
+
 	defp do_load(raw_data, key \\ nil)
 	defp do_load({:ok, data_kw} = _raw_data, key) do
 		title = Keyword.get(data_kw, :title, "Song Title")

@@ -24,7 +24,7 @@
 						<li draggable-index="<%= i %>" draggable="true" class="draggable flex<%= if current_song?(@display, i) do %> active<% end %>" id="songlist-<%= i %>">
 							<a phx-click="set_current_song" phx-value-index="<%= i %>"><%= s %></a>
 							<div class="actions">
-								<button title="Remove Song from Playlist" class="i" phx-click="remove_song_at" phx-value-index="<%= i %>"><i class="material-icons">remove_circle</i></button>
+								<button title="Remove Song from Playlist" class="i" phx-click="remove_song_at" phx-value-index="<%= i %>"><i class="material-icons">close</i></button>
 								<button title="Drag to Re-order Song" class="i handle"><i class="material-icons">drag_handle</i></button>
 							</div>
 						</li>
@@ -48,18 +48,48 @@
 		</div>
 	<% end %>
 
-	<div id="slides-container">
-		<div class="actions">
-			<button id="add-slide-button" phx-click="add_slide" class="i" title="Add Slide"><i class="material-icons">queue_play_next</i></button>
+	<div id="slides-container" class="<%= if @display.frozen? do %>frozen<% end %><%= if @display.hidden? do %> hidden<% end %>">
+		<div class="actions flex flex-wrap" style="max-width:100vw;">
+			<button phx-click="toggle_hidden" class="i" title="<%= if @display.hidden? do %>Show Slide<% else %>Hide Slide<% end %> (Space)">
+				<%= if @display.hidden? do %>
+					<i class="material-icons">visibility</i>
+				<% else %>
+					<i class="material-icons">visibility_off</i>
+				<% end %>
+			</button>
+			<button phx-click="toggle_frozen" class="i" title="Pause/Freeze (F)">
+				<%= if @display.frozen? do %>
+					<i class="material-icons">play_arrow</i>
+				<% else %>
+					<i class="material-icons">pause</i>
+				<% end %>
+			</button>
+			<button <%= if !Display.can_prev_song?(@display) do "disabled" end %> phx-click="prev_song" class="i" title="Previous Song (Ctrl+Left Arrow)">
+				<i class="material-icons">skip_previous</i>
+			</button>
+			<button <%= if !Display.can_prev_slide?(@display) do "disabled" end %> phx-click="prev_slide" class="i" title="Previous Slide/Song (Left Arrow)">
+				<i class="material-icons">navigate_before</i>
+			</button>
+			<button <%= if !Display.can_next_slide?(@display) do "disabled" end %> phx-click="next_slide" class="i" title="Next Slide/Song (Right Arrow)">
+				<i class="material-icons">navigate_next</i>
+			</button>
+			<button <%= if !Display.can_next_song?(@display) do "disabled" end %> phx-click="next_song" class="i" title="Next Song (Ctrl+Right Arrow)">
+				<i class="material-icons">skip_next</i>
+			</button>
+			<button id="add-slide-button" phx-click="begin_add_slide" class="i" title="Add Slide"><i class="material-icons">queue_play_next</i></button>
 		</div>
 		<%= if Enum.count(assigns[:slides] || []) > 0 do %>
 			<div id="slides" phx-hook="dragdrop" data-group="slides">
 				<%= for {{title, content}, i} <- Enum.with_index(assigns[:slides] || []) do %>
-					<div draggable-index="<%= i - 1 %>" id="slide-<%= i %>" phx-click="set_current_slide" phx-value-index="<%= i %>" draggable="true" class="slide<%= if current_slide?(@display, i) do %> active<% end %><%= if title != "@title" do %> draggable<% end %>">
+					<div title="<%= title %>" draggable-index="<%= i - 1 %>" id="slide-<%= i %>" phx-click="set_current_slide" phx-value-index="<%= i %>" draggable="true" class="slide<%= if current_slide?(@display, i) do %> active<% end %><%= if title != "@title" do %> draggable<% end %>">
 						<span class="slide-title"><%= title %></span>
 						<span class="slide-content"><%= content %></span>
 						<div class="actions">
-							<%= if title != "@title" do %><button title="Drag to Re-order Slide" class="i handle"><i class="material-icons">drag_handle</i></button><% end %>
+							<%= if title != "@title" do %>
+								<button title="Drag to Re-order Slide" class="i handle"><i class="material-icons">drag_handle</i></button>
+								<button phx-value-at="<%= i - 1 %>" phx-click="copy_slide" title="<%= if title == "" do "Duplicate Slide" else "Duplicate Reference" end %>" class="i"><i class="material-icons">content_copy</i></button>
+								<button phx-value-at="<%= i - 1 %>" phx-click="remove_slide" title="Remove Slide" class="i"><i class="material-icons">close</i></button>
+							<% end %>
 						</div>
 					</div>
 				<% end %>
@@ -76,6 +106,17 @@
 			</div>
 		<% end %>
 	</div>
+
+<style>
+#slides .slide[title='repeat' i] .slide-title {
+	opacity: 1.0;
+	color: #f0f;
+}
+#slides .slide[title='@title'] .slide-title {
+	opacity: 1.0;
+	color: #258;
+}
+</style>
 
 	<%= if @adding_song? do %>
 		<div class="cover with-overlay flex flex-center" phx-submit="add_song" phx-change="suggest_song">
@@ -95,13 +136,43 @@
 					</datalist>
 
 					<footer>
-						<input title="Adds the found song to the playlist" <%= if !@add_song_allowed?, do: "disabled", else: "" %> class="primary" type="submit" name="atp" id="songadd_atp" value="Add to Playlist" phx-hook="addsongtype" />
-						<input title="Adds a new song with the current song name" <%= if !@new_song_allowed?, do: "disabled", else: "" %> type="submit" value="New Song" name="newsong" id="songadd_newsong" phx-hook="addsongtype" />
-						<button phx-click="cancel_add_song">Cancel</button>
+						<input title="Adds the found song to the playlist" <%= if !@add_song_allowed?, do: "disabled", else: "" %> class="primary" type="submit" name="atp" id="songadd_atp" value="Add" phx-hook="addsongtype" />
+						<input title="Adds a new song with the current song name" <%= if !@new_song_allowed?, do: "disabled", else: "" %> type="submit" value="New" name="newsong" id="songadd_newsong" phx-hook="addsongtype" />
+						<button type="button" phx-click="cancel_add_song">Cancel</button>
 					</footer>
 				</form>
 			</div>
 			<button class="i cover-close" phx-click="cancel_add_song"><i class="material-icons">close</i></button>
+		</div>
+	<% end %>
+
+	<%= if @adding_slide? do %>
+		<div class="cover with-overlay flex flex-center" phx-submit="add_slide" phx-change="suggest_slide">
+			<div class="modal">
+				<header>
+					<span class="title">Add Slide to Song</span>
+					<div class="tabs">
+						<%= for bt <- ~w{bare named reference repeat} do %>
+							<button phx-click="set_add_slide_type" phx-value-slide-type="<%= bt %>" type="button" class="tab<%= if @add_slide_type == bt do " active" end %>"><%= String.capitalize(bt) %></button>
+						<% end %>
+					</div>
+				</header>
+				<form class="flex" phx-submit="add_slide" phx-change="suggest_slide">
+					<input type="text" name="key" list="sliderefs" autocomplete="off" />
+					<textarea name="content" rows=6></textarea>
+					<datalist id="sliderefs">
+						<%= for s <- Display.current_song(@display) |> elem(1) |> Song.named_slides() do %>
+							<option value="<%= s.key %>" />
+						<% end %>
+					</datalist>
+
+					<footer>
+						<input <%= if !@add_slide_valid?, do: "disabled", else: "" %> type="submit" title="Add to Song" value="Add" />
+						<button type="button" phx-click="cancel_add_slide">Cancel</button>
+					</footer>
+				</form>
+			</div>
+			<button class="i cover-close" phx-click="cancel_add_slide"><i class="material-icons">close</i></button>
 		</div>
 	<% end %>
 </div>

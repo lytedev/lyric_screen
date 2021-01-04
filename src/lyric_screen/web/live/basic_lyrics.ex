@@ -19,8 +19,14 @@ defmodule LyricScreen.Web.Live.BasicLyrics do
 		end
 	end
 
-	def set_slide_contents(socket) do
-		case Display.current_slide(socket.assigns.display) do
+	def set_slide_contents(%{assigns: %{display: %{frozen?: true}}} = socket) do
+		assign(socket, current_slide_contents: "FREEZE")
+	end
+	def set_slide_contents(%{assigns: %{display: %{hidden?: true}}} = socket) do
+		assign(socket, current_slide_contents: "")
+	end
+	def set_slide_contents(%{assigns: %{display: display}} = socket) do
+		case Display.current_slide(display) do
 			{:ok, {_title, contents}} -> assign(socket, current_slide_contents: contents)
 			_ -> assign(socket, current_slide_contents: "")
 		end

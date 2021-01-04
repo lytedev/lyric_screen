@@ -81,8 +81,8 @@ defmodule LyricScreen.Display do
 		case playlist(display) do
 			{:ok, playlist} -> Playlist.songs(playlist)
 			err ->
-				Logger.error(inspect(err))
-				err
+				Logger.warn("Error while getting display's playlist's songs: #{inspect(err)}")
+				[]
 		end
 	end
 
@@ -97,71 +97,81 @@ defmodule LyricScreen.Display do
 
 	def current_slides(%__MODULE__{} = display) do
 		case current_song(display) do
-			{:ok, song} -> {:ok, Song.map(song)}
+			{:ok, song} -> Song.map(song)
 			err ->
-				Logger.error(inspect(err))
-				err
+				Logger.warn("Error while getting display's current slides: #{inspect(err)}")
+				[]
 		end
 	end
 
 	def current_slide(%__MODULE__{current_slide_index: i} = display) do
 		case current_slides(display) do
-			{:ok, slides} -> {:ok, Enum.at(slides, i)}
-			err ->
-				Logger.error(inspect(err))
-				err
+			# TODO: case Enum.at...
+			[] -> {:error, :no_slides}
+			slides ->
+				case Enum.at(slides, i) do
+					nil -> {:error, ["No slide ", i, " in ", slides]}
+				end
 		end
 	end
 
-	def set_current_song_index(%__MODULE__{} = display, index \\ nil) do
-    i = index || display.current_song_index
-		Logger.debug("Setting Current Song Index: #{i}")
-    num_songs =
-			case playlist(display) do
-				{:ok, playlist} -> Enum.count(playlist.songs)
-				_ -> 0
-			end
-		old_display = display
-		display = %{display | current_song_index: i}
+	def num_songs(%__MODULE__{} = display) do
+		case playlist(display) do
+			{:ok, playlist} -> Enum.count(playlist.songs)
+			_ -> 0
+		end
+	end
+
+	def num_slides(%__MODULE__{} = display), do: display |> current_slides() |> Enum.count()
+
+	def set_current_song_index(%__MODULE__{} = display, nil), do: set_current_song_index(display, display.current_song_index)
+	def set_current_song_index(%__MODULE__{} = display, i) do
+		num_songs = num_songs(display)
+		new_display = %{display | current_song_index: i}
     cond do
-      i >= 0 and i < num_songs -> display
-			num_songs > 0 and i >= num_songs ->
-				{:ok, display} = set_current_song_index(display, i - 1)
-				display
-      true -> old_display
+      i >= 0 and i < num_songs -> new_display
+			num_songs > 0 and i >= num_songs -> {:ok, d} = set_current_song_index(new_display, i - 1); d
+      true -> display
     end
 		|> save_to_file()
 	end
 
-	def set_current_slide_index(%__MODULE__{} = display, index \\ nil) do
-    i = index || display.current_slide_index
-    s = display.current_song_index
-		Logger.debug("Setting Current Slide Index: #{i}")
-		old_display = display
+	def set_current_slide_index(%__MODULE__{} = display, nil), do: set_current_slide_index(display, display.current_slide_index)
+	def set_current_slide_index(%__MODULE__{current_song_index: csi} = display, i) do
 		# TODO: rescue
-		{:ok, slides} = current_slides(display)
-		num_slides = slides |> Enum.count()
-    num_songs =
-			case playlist(display) do
-				{:ok, playlist} -> Enum.count(playlist.songs)
-				_ -> 0
-			end
-		display = %{display | current_slide_index: i}
+		num_slides = num_slides(display)
+    num_songs = num_songs(display)
+		new_display = %{display | current_slide_index: i}
 		cond do
 			# TODO: check if song navigation is even possible - may be a noop
-			i == -1 && s > 0 ->
-				{:ok, display} = set_current_song_index(%{display | current_slide_index: 0}, display.current_song_index - 1)
+			i == -1 && csi > 0 ->
+				{:ok, display} = set_current_song_index(%{new_display | current_slide_index: 0}, csi - 1)
 				save_to_file(display)
-			i == num_slides && s < num_songs - 1 ->
-				{:ok, display} = set_current_song_index(%{display | current_slide_index: 0}, display.current_song_index + 1)
+			i == num_slides && csi < num_songs - 1 ->
+				{:ok, display} = set_current_song_index(%{new_display | current_slide_index: 0}, csi + 1)
 				save_to_file(display)
-			i >= 0 and i < num_slides -> {:ok, display}
+			i >= 0 and i < num_slides -> {:ok, new_display}
 			num_slides > 0 and i >= num_slides ->
-				{:ok, display} = set_current_slide_index(display, i - 1)
+				{:ok, display} = set_current_slide_index(new_display, i - 1)
 				save_to_file(display)
-			true -> {:ok, old_display}
+			true -> {:ok, display}
 		end
 	end
 
 	def set_playlist(%__MODULE__{} = display, p), do: %{display | playlist: p} |> save_to_file()
+
+	def toggle_hidden(%__MODULE__{hidden?: hidden?} = display), do: %{display | hidden?: !hidden?} |> save_to_file()
+	def toggle_frozen(%__MODULE__{frozen?: frozen?} = display), do: %{display | frozen?: !frozen?} |> save_to_file()
+
+	def can_prev_song?(%__MODULE__{current_song_index: csi}), do: csi > 0
+	def can_next_song?(%__MODULE__{current_song_index: csi} = display) do
+		csi < num_songs(display) - 1
+	end
+
+	def can_prev_slide?(%__MODULE__{current_slide_index: csi} = display) do
+		csi > 0 || can_prev_song?(display)
+	end
+	def can_next_slide?(%__MODULE__{current_slide_index: csi} = display) do
+		csi < num_slides(display) - 1 || can_next_song?(display)
+	end
 end
