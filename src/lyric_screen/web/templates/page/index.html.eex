@@ -123,7 +123,8 @@ h2, h3, h4, h5, h6 {
 			</ul>
 			<h3>Bugs</h3>
 			<ul>
-				<li>✅ None known yet!</li>
+				<li>Adding a song to an empty playlist should reset the display's current slide</li>
+				<!-- <li>✅ None known yet!</li> -->
 			</ul>
 			<p class="text-center">
 				Find a bug? Have a feature request? Email me at <a href="mailto:daniel@lyte.dev">daniel@lyte.dev</a>
