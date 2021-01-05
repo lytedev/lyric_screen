@@ -130,7 +130,7 @@ defmodule LyricScreen.Display do
 	def slide_at(display, song_index, slide_index) do
 		with {_, {:ok, playlist}} <- {:playlist, playlist(display)},
 				 {_, {:ok, song}} <- {:song, Playlist.song_at(playlist, song_index)},
-				 {_, slide} <- {:slide, Song.verse_at(song, slide_index)}
+				 {_, slide} <- {:slide, Song.slide_at(song, slide_index)}
 		do
 			{:ok, slide}
 		else

@@ -21,13 +21,14 @@
 			<h2 class="flex" style="margin-top: 0">Status <span class="success flex-push-right">✅</span></h2>
 			<h3>To Do (for v1.0)</h3>
 			<ul>
-				<li>Pause and freeze functionality</li>
 				<li>Slide editing controls</li>
 				<li>Display slide fade transitions</li>
 				<li>Song deletion</li>
 				<li>Playlist, song, and display management</li>
 				<li>Image backgrounds</li>
 				<!-- Long term goals should go in the readme -->
+				<li class="st">✅ Controls for hotkey functions</li>
+				<li class="st">✅ Pause and freeze functionality</li>
 			</ul>
 			<h3>Bugs</h3>
 			<ul>

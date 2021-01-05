@@ -1,6 +1,20 @@
 let csrfToken = document.querySelector('meta[name=csrf-token]').getAttribute('content')
 
 let hooks = {
+	editslidekey: {
+		mounted() {
+			console.log("editslidekey mounted")
+			this.el.value = document.getElementById("edit_slide_key").value
+		},
+		destroyed() {},
+	},
+	editslidecontent: {
+		mounted() {
+			console.log("editslidecontent mounted")
+			this.el.value = document.getElementById("edit_slide_content").value
+		},
+		destroyed() {},
+	},
 	addsongtype: {
 		mounted() {
 			this.el.addEventListener('click', (e) => {

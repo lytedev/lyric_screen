@@ -16,16 +16,7 @@ defmodule LyricScreen.Web.Live.ControlPanel do
       socket
 			|> load_all_songs()
 			|> close_all_modals()
-			|> assign(
-				search_test: "",
-				show_sidebar?: true,
-
-				# modal stuff
-				new_song_allowed?: false,
-				add_song_allowed?: false,
-				add_slide_type: "bare",
-				add_slide_valid?: false
-			)
+			|> assign(search_test: "", show_sidebar?: true)
       |> load_display(session["display"])
     }
 	end
@@ -35,7 +26,14 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 			in_modal?: false,
 			adding_song?: false,
 			adding_slide?: false,
-			editing_slide?: false
+			editing_slide?: false,
+			new_song_allowed?: false,
+			add_song_allowed?: false,
+			add_slide_type: "bare",
+			edit_slide_at: nil,
+			edit_slide_content: "",
+			edit_slide_key: "",
+			add_slide_valid?: false
 		)
 	end
 
@@ -143,6 +141,7 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 	end
 
 	def reorder_slide(socket, old_at, new_at) do
+		Logger.info("Reordering slides: #{inspect(socket)} #{old_at} -> #{new_at}")
 		case current_song(socket) do
 			{:ok, song} ->
 				{verse, rest} = List.pop_at(song.verses, old_at)
@@ -174,6 +173,18 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 		err ->
 			Logger.error(inspect(err))
 			socket
+	end
+
+	def append_slide(socket, %SongVerse{} = sv) do
+		{:ok, song} = Display.current_song(socket.assigns.display)
+		set_current_song_verses(socket, song.verses ++ [sv])
+	end
+
+	defp do_append_slide(socket, %SongVerse{} = sv) do
+		socket
+		|> append_slide(sv)
+		|> close_all_modals()
+		|> simple_sync_event()
 	end
 
 	def send_playlist_sync(socket, playlist \\ nil) do
@@ -212,6 +223,10 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 	end
 
   defp simple_sync_event(socket), do: {:noreply, send_sync_all(socket)}
+
+	defp process_content(content) do
+		content |> String.trim() |> String.split("\n")
+	end
 
 	def handle_event("remove_song_at", %{"index" => index}, socket) do
     {:ok, playlist} = Playlist.remove_song_at(socket.assigns.playlist, String.to_integer(index))
@@ -312,8 +327,43 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 	def handle_event("cancel_add_slide", _, socket), do: {:noreply, close_all_modals(socket)}
 	def handle_event("begin_add_slide", _, socket), do: {:noreply, show_add_slide_form(socket)}
 
-	def handle_event("add_slide", %{type: "bare", content: content}, socket) do
-		{:noreply, show_add_slide_form(socket)}
+	def handle_event("suggest_slide", %{} = args, %{assigns: %{add_slide_type: type}} = socket) do
+		name = Map.get(args, "key", "")
+		content = Map.get(args, "content", "")
+		existing_slides = Display.current_song(socket.assigns.display) |> elem(1) |> Song.named_slides() |> Enum.map(& &1.key)
+		valid? =
+			case type do
+				"bare" -> true
+				"ref" -> true # TODO: show a warning that the slide will be blank if the name doesn't exist?
+				"named" -> socket.assigns.edit_slide_key != nil || (name != "" && !(name in existing_slides))
+				"repeat" -> true
+			end
+		{:noreply, assign(socket, add_slide_valid?: valid?)}
+	end
+
+	def handle_event("add_slide", args, %{assigns: %{edit_slide_at: n}} = socket) when is_integer(n) do
+		num_slides = Display.num_slides(socket.assigns.display)
+		{:noreply, socket} = handle_event("remove_slide", %{"at" => Integer.to_string(n)}, assign(socket, edit_slide_at: nil))
+		{:noreply, socket} = handle_event("add_slide", args, socket)
+		Logger.warn(inspect({socket, num_slides, n}, pretty: true))
+
+		{:noreply, reorder_slide(socket, num_slides - 2, n - 0)}
+	end
+
+	def handle_event("add_slide", %{"key" => name}, %{assigns: %{add_slide_type: "ref"}} = socket) do
+		do_append_slide(socket, %SongVerse{type: :ref, key: name})
+	end
+
+	def handle_event("add_slide", %{"content" => content, "key" => name}, %{assigns: %{add_slide_type: "named"}} = socket) do
+		do_append_slide(socket, %SongVerse{type: :named, key: name, content: process_content(content)})
+	end
+
+	def handle_event("add_slide", %{"content" => content}, %{assigns: %{add_slide_type: "bare"}} = socket) do
+		do_append_slide(socket, %SongVerse{type: :bare, content: process_content(content)})
+	end
+
+	def handle_event("add_slide", _, %{assigns: %{add_slide_type: "repeat"}} = socket) do
+		do_append_slide(socket, %SongVerse{type: :ref, key: "Repeat"})
 	end
 
 	def handle_event("copy_slide", %{"at" => str_at}, socket) do
@@ -334,6 +384,24 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 				Logger.error(inspect(err))
 				{:noreply, socket}
 		end
+	end
+
+	def handle_event("edit_slide", %{"at" => str_at}, socket) do
+		at = String.to_integer(str_at)
+		{:ok, song} = Display.current_song(socket.assigns.display)
+		sv = Song.verse_at(song, at)
+		type =
+			case sv do
+				%{type: :ref, key: key} ->
+					if String.downcase(key) == "repeat", do: "repeat", else: "reference"
+				%{type: :named} -> "named"
+				%{type: :bare} -> "bare"
+			end
+		{:noreply,
+			socket
+			|> show_add_slide_form()
+			|> assign(edit_slide_at: at, edit_slide_key: sv.key, edit_slide_content: SongVerse.content(sv), add_slide_type: type, add_slide_valid?: true)
+		}
 	end
 
 	# TODO: Add an "are you sure" if the verse is a named verse?
@@ -425,7 +493,6 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 	def handle_event("show_sidebar", _path, socket), do: {:noreply, assign(socket, show_sidebar?: true)}
 
 	def handle_event("key", %{"key" => "Escape"}, %{assigns: %{in_modal?: true}} = socket) do
-		IO.inspect("CLOSE IT")
 		{:noreply, close_all_modals(socket)}
 	end
 

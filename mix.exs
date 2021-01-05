@@ -1,7 +1,7 @@
 defmodule LyricScreen.MixProject do
 	use Mix.Project
 
-	@version "0.4.2"
+	@version "0.4.5"
 
 	@src_path "src"
 	@priv_path Path.join(@src_path, "priv")

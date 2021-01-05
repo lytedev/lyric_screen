@@ -206,6 +206,10 @@ button.i {
 	flex-direction: column;
 }
 
+.modal form input + textarea {
+	margin-top: 1em;
+}
+
 .modal footer {
 	display: flex;
 	flex-direction: row-reverse;
@@ -244,6 +248,10 @@ button.i {
 .tabs button.tab.active,
 .tabs .tab.active {
 	border-bottom-color: var(--lc);
+}
+
+.st {
+	text-decoration: line-through;
 }
 
 #control-panel {
@@ -318,6 +326,9 @@ button.i {
 #songlist li a:hover {
 	background-color: rgba(255, 255, 255, 0.05);
 }
+#songlist li.active.frozen-active a {
+	border-right: solid 0.25em var(--success);
+}
 
 #songlist li .button,
 #songlist li button {
@@ -390,7 +401,7 @@ button.i {
 	height: 100vh;
 }
 
-#slides-container .actions {
+#slides-container > .actions {
 	padding: 0.25em 0;
 	box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.5);
 	justify-content: center;
@@ -447,6 +458,10 @@ button.i {
 
 #slides .slide.active:hover {
 	border-color: var(--lc-20);
+}
+
+#slides .slide.active.frozen-active {
+	border-color: var(--success);
 }
 
 #slides-container.hidden #slides .slide {

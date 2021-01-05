@@ -89,6 +89,7 @@
 								<button title="Drag to Re-order Slide" class="i handle"><i class="material-icons">drag_handle</i></button>
 								<button phx-value-at="<%= i - 1 %>" phx-click="copy_slide" title="<%= if title == "" do "Duplicate Slide" else "Duplicate Reference" end %>" class="i"><i class="material-icons">content_copy</i></button>
 								<button phx-value-at="<%= i - 1 %>" phx-click="remove_slide" title="Remove Slide" class="i"><i class="material-icons">close</i></button>
+								<button phx-value-at="<%= i - 1 %>" phx-click="edit_slide" title="Edit Slide" class="i"><i class="material-icons">edit</i></button>
 							<% end %>
 						</div>
 					</div>
@@ -158,8 +159,15 @@
 					</div>
 				</header>
 				<form class="flex" phx-submit="add_slide" phx-change="suggest_slide">
-					<input type="text" name="key" list="sliderefs" autocomplete="off" />
-					<textarea name="content" rows=6></textarea>
+					<%= if @add_slide_type in ["repeat"] do %>
+						<p>A "Repeat" slide always references<br />the previous slide.</p>
+					<% end %>
+					<%= if @add_slide_type in ["named", "reference"] do %>
+						<input id="slidekeyinput" phx-hook="focus" placeholder="Slide Name" type="text" name="key" list="sliderefs" autocomplete="off" value="<%= assigns[:edit_slide_key] || "" %>" />
+					<% end %>
+					<%= if @add_slide_type in ["named", "bare"] do %>
+						<textarea id="slidecontentinput" phx-hook="focus" placeholder="Slide Content" name="content" rows=6><%= assigns[:edit_slide_content] || "" %></textarea>
+					<% end %>
 					<datalist id="sliderefs">
 						<%= for s <- Display.current_song(@display) |> elem(1) |> Song.named_slides() do %>
 							<option value="<%= s.key %>" />
