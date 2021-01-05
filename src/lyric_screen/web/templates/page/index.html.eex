@@ -1,3 +1,55 @@
+<div id="index">
+	<h1><%= gettext "Welcome to %{name}!", name: "LyricScreen" %> 🎉</h1>
+	<div class="flex flex-col">
+		<div class="card-container">
+			<a href="/display/controls/default" class="card">
+				<i class="material-icons">important_devices</i>
+				<span>Control Panel</span>
+			</a>
+			<a href="/display/default" target="_blank" class="card">
+				<i class="material-icons">input</i>
+				<span>Display</span>
+			</a>
+			<%= if Application.get_env(:lyric_screen, :env) in [:dev, :test] do %>
+				<a href="/admin/live-dashboard" class="card">
+					<i class="material-icons">auto_graph</i>
+					<span>Live Dashboard</span>
+				</a>
+			<% end %>
+		</div>
+		<div id="status">
+			<h2 class="flex" style="margin-top: 0">Status <span class="success flex-push-right">✅</span></h2>
+			<h3>To Do (for v1.0)</h3>
+			<ul>
+				<li>Pause and freeze functionality</li>
+				<li>Slide editing controls</li>
+				<li>Display slide fade transitions</li>
+				<li>Song deletion</li>
+				<li>Playlist, song, and display management</li>
+				<li>Image backgrounds</li>
+				<!-- Long term goals should go in the readme -->
+			</ul>
+			<h3>Bugs</h3>
+			<ul>
+				<li>Adding a song to an empty playlist should reset the display's current slide</li>
+				<!-- <li>✅ None known yet!</li> -->
+			</ul>
+			<p class="text-center">
+				Find a bug? Have a feature request? Email me at <a href="mailto:daniel@lyte.dev">daniel@lyte.dev</a>
+			</p>
+		</div>
+	</div>
+	<span id="ls-version-info">v<%=
+		[
+			:application.get_key(:lyric_screen, :vsn) |> elem(1),
+			Application.get_env(:lyric_screen, :version_git_rev),
+			Application.get_env(:lyric_screen, :version_git_branch),
+			Application.get_env(:lyric_screen, :compiled_at) |> NaiveDateTime.to_date(),
+			Application.get_env(:lyric_screen, :compiled_at) |> NaiveDateTime.truncate(:second) |> NaiveDateTime.to_time(),
+		] |> Enum.join("-")
+	%></span>
+</div>
+
 <style>
 #index {
 	max-width: 400px;
@@ -88,57 +140,4 @@ h2, h3, h4, h5, h6 {
 	margin-top: 1em;
 }
 </style>
-
-<div id="index">
-	<h1><%= gettext "Welcome to %{name}!", name: "LyricScreen" %> 🎉</h1>
-	<div class="flex flex-col">
-		<div class="card-container">
-			<a href="/display/controls/default" class="card">
-				<i class="material-icons">important_devices</i>
-				<span>Control Panel</span>
-			</a>
-			<a href="/display/default" target="_blank" class="card">
-				<i class="material-icons">input</i>
-				<span>Display</span>
-			</a>
-			<%= if Application.get_env(:lyric_screen, :env) in [:dev, :test] do %>
-				<a href="/admin/live-dashboard" class="card">
-					<i class="material-icons">auto_graph</i>
-					<span>Live Dashboard</span>
-				</a>
-			<% end %>
-		</div>
-		<div id="status">
-			<h2 class="flex" style="margin-top: 0">Status <span class="success flex-push-right">✅</span></h2>
-			<h3>To Do (for v1.0)</h3>
-			<ul>
-				<li>Controls for hotkey functions</li>
-				<li>Pause and freeze functionality</li>
-				<li>Slide editing controls</li>
-				<li>Display slide fade transitions</li>
-				<li>Song deletion</li>
-				<li>Playlist, song, and display management</li>
-				<li>Image backgrounds</li>
-				<!-- Long term goals should go in the readme -->
-			</ul>
-			<h3>Bugs</h3>
-			<ul>
-				<li>Adding a song to an empty playlist should reset the display's current slide</li>
-				<!-- <li>✅ None known yet!</li> -->
-			</ul>
-			<p class="text-center">
-				Find a bug? Have a feature request? Email me at <a href="mailto:daniel@lyte.dev">daniel@lyte.dev</a>
-			</p>
-		</div>
-	</div>
-	<span id="ls-version-info">v<%=
-		[
-			:application.get_key(:lyric_screen, :vsn) |> elem(1),
-			Application.get_env(:lyric_screen, :version_git_rev),
-			Application.get_env(:lyric_screen, :version_git_branch),
-			Application.get_env(:lyric_screen, :compiled_at) |> NaiveDateTime.to_date(),
-			Application.get_env(:lyric_screen, :compiled_at) |> NaiveDateTime.truncate(:second) |> NaiveDateTime.to_time(),
-		] |> Enum.join("-")
-	%></span>
-</div>
 

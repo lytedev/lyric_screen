@@ -424,12 +424,20 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 	def handle_event("hide_sidebar", _path, socket), do: {:noreply, assign(socket, show_sidebar?: false)}
 	def handle_event("show_sidebar", _path, socket), do: {:noreply, assign(socket, show_sidebar?: true)}
 
+	def handle_event("key", %{"key" => "Escape"}, %{assigns: %{in_modal?: true}} = socket) do
+		IO.inspect("CLOSE IT")
+		{:noreply, close_all_modals(socket)}
+	end
+
   def handle_event("key", _, %{assigns: %{in_modal?: true}} = socket), do: {:noreply, socket}
 
-	def handle_event("key", %{"key" => " "}, socket), do: handle_event("toggle_hidden", %{}, socket)
-	def handle_event("key", %{"key" => "f"}, socket), do: handle_event("toggle_frozen", %{}, socket)
-
-  def handle_event("key", %{"key" => "Escape"}, %{assigns: %{in_modal?: true}} = socket), do: {:noreply, close_all_modals(socket)}
+	def handle_event("key", %{"key" => "p"}, %{assigns: %{in_modal?: false}} = socket), do: handle_event("toggle_hidden", %{}, socket)
+	def handle_event("key", %{"key" => "h"}, %{assigns: %{in_modal?: false}} = socket), do: handle_event("prev_slide", %{}, socket)
+	def handle_event("key", %{"key" => "k"}, %{assigns: %{in_modal?: false}} = socket), do: handle_event("prev_slide", %{}, socket)
+	def handle_event("key", %{"key" => "j"}, %{assigns: %{in_modal?: false}} = socket), do: handle_event("next_slide", %{}, socket)
+	def handle_event("key", %{"key" => "l"}, %{assigns: %{in_modal?: false}} = socket), do: handle_event("next_slide", %{}, socket)
+	def handle_event("key", %{"key" => " "}, %{assigns: %{in_modal?: false}} = socket), do: handle_event("toggle_hidden", %{}, socket)
+	def handle_event("key", %{"key" => "f"}, %{assigns: %{in_modal?: false}} = socket), do: handle_event("toggle_frozen", %{}, socket)
 
   def handle_event("key", %{"ctrlKey" => true, "shiftKey" => false, "key" => "ArrowUp"}, socket), do: handle_event("prev_song", %{}, socket)
   def handle_event("key", %{"ctrlKey" => true, "shiftKey" => false, "key" => "ArrowLeft"}, socket), do: handle_event("prev_song", %{}, socket)

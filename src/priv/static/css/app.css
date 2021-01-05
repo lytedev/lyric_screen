@@ -13,6 +13,8 @@
 	--fg: #fff;
 	--lc: #c4f;
 	--lcp: #80d;
+	--info: #0af;
+	--success: #4f8;
 	--lc-20: #d8f;
 	--cerrp: #a20;
 	--f: Lato;
@@ -67,7 +69,7 @@ button.primary {
 }
 
 .success {
-	color: #4f8;
+	color: var(--success);
 }
 
 .button.error,
@@ -307,6 +309,9 @@ button.i {
 	padding: 0.5em;
 	transition: background-color 0.2s ease, border-color 0.2s ease;
 }
+#songlist li.frozen-active a {
+	border-right: solid 0.25em var(--info);
+}
 #songlist li.active a {
 	border-right: solid 0.25em var(--lc);
 }
@@ -421,7 +426,7 @@ button.i {
 	align-items: center;
 	text-align: center;
 	cursor: pointer;
-	transition: border 0.2s ease;
+	transition: border-color 0.2s ease, border-style 0.2s ease;
 }
 
 #slides .slide .slide-content {
@@ -432,12 +437,20 @@ button.i {
 	border-color: #888;
 }
 
+#slides .slide.frozen-active {
+	border-color: var(--info);
+}
+
 #slides .slide.active {
 	border-color: var(--lc);
 }
 
 #slides .slide.active:hover {
 	border-color: var(--lc-20);
+}
+
+#slides-container.hidden #slides .slide {
+	border-style: dashed;
 }
 
 #slides .slide .slide-title {

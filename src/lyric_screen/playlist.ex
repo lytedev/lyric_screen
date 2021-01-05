@@ -59,6 +59,7 @@ defmodule LyricScreen.Playlist do
 
 	require Logger
 
+	# TODO: adding fields to this may break all users' data?
 	defstruct [
 		key: nil,
 		display_title: "Playlist Title",

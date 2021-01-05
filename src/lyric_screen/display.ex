@@ -54,10 +54,11 @@ end
 defmodule LyricScreen.Display do
 	@moduledoc false
 
-	alias LyricScreen.{Playlist, Song, SongVerse}
+	alias LyricScreen.{Playlist, Song}
 	alias LyricScreen.Display.File, as: F
 	require Logger
 
+	# TODO: adding fields to this may break all users' data?
 	defstruct [
 		# TODO: show_titles?: true,
 		# TODO: show_performer_metadata?: true,
@@ -66,10 +67,19 @@ defmodule LyricScreen.Display do
 		current_song_index: 0,
 		current_slide_index: 0,
 		frozen?: false,
+		frozen_song: nil,
+		frozen_slide: nil,
 		hidden?: false,
 	]
 
-	def load_from_file(f), do: F.parse_file(f)
+	def load_from_file(f) do
+		case F.parse_file(f) do
+			{:ok, display} -> {:ok, Map.merge(%__MODULE__{}, display)}
+			{:error, err} -> {:error, err}
+			# err -> {:error, err}
+		end
+	end
+
 	def save_to_file(%__MODULE__{key: key} = display) do
 		:ok = File.write(Path.join(F.dir(), key <> ".txt"), :erlang.term_to_binary(display))
 		{:ok, display}
@@ -83,6 +93,15 @@ defmodule LyricScreen.Display do
 			err ->
 				Logger.warn("Error while getting display's playlist's songs: #{inspect(err)}")
 				[]
+		end
+	end
+
+	def song_at(display, song_index \\ nil)
+	def song_at(display, nil), do: song_at(display, display.current_song_index)
+	def song_at(display, song_index) do
+		case playlist(display) do
+			{:ok, playlist} -> Playlist.song_at(playlist, song_index)
+			err -> err
 		end
 	end
 
@@ -104,6 +123,24 @@ defmodule LyricScreen.Display do
 		end
 	end
 
+	def slide_at(display, song_index \\ nil, slide_index \\ nil)
+	def slide_at(display, nil, nil) do
+		slide_at(display, display.current_song_index, display.current_slide_index)
+	end
+	def slide_at(display, song_index, slide_index) do
+		with {_, {:ok, playlist}} <- {:playlist, playlist(display)},
+				 {_, {:ok, song}} <- {:song, Playlist.song_at(playlist, song_index)},
+				 {_, slide} <- {:slide, Song.verse_at(song, slide_index)}
+		do
+			{:ok, slide}
+		else
+			{:playlist, err} -> err
+			{:song, err} -> err
+			{:slide, err} -> err
+			{:error, err} -> {:error, err}
+		end
+	end
+
 	def current_slide(%__MODULE__{current_slide_index: i} = display) do
 		case current_slides(display) do
 			# TODO: case Enum.at...
@@ -111,6 +148,7 @@ defmodule LyricScreen.Display do
 			slides ->
 				case Enum.at(slides, i) do
 					nil -> {:error, ["No slide ", i, " in ", slides]}
+					{title, content} -> {title, content}
 				end
 		end
 	end
@@ -150,7 +188,8 @@ defmodule LyricScreen.Display do
 			i == num_slides && csi < num_songs - 1 ->
 				{:ok, display} = set_current_song_index(%{new_display | current_slide_index: 0}, csi + 1)
 				save_to_file(display)
-			i >= 0 and i < num_slides -> {:ok, new_display}
+			i >= 0 and i < num_slides ->
+				save_to_file(new_display)
 			num_slides > 0 and i >= num_slides ->
 				{:ok, display} = set_current_slide_index(new_display, i - 1)
 				save_to_file(display)
@@ -161,7 +200,15 @@ defmodule LyricScreen.Display do
 	def set_playlist(%__MODULE__{} = display, p), do: %{display | playlist: p} |> save_to_file()
 
 	def toggle_hidden(%__MODULE__{hidden?: hidden?} = display), do: %{display | hidden?: !hidden?} |> save_to_file()
-	def toggle_frozen(%__MODULE__{frozen?: frozen?} = display), do: %{display | frozen?: !frozen?} |> save_to_file()
+
+	def toggle_frozen(%__MODULE__{frozen?: frozen?} = display) do
+		IO.inspect(display)
+		if frozen? do
+			%{display | frozen?: false, frozen_song: nil, frozen_slide: nil} |> save_to_file()
+		else
+			%{display | frozen?: true, frozen_song: display.current_song_index, frozen_slide: display.current_slide_index} |> save_to_file()
+		end
+	end
 
 	def can_prev_song?(%__MODULE__{current_song_index: csi}), do: csi > 0
 	def can_next_song?(%__MODULE__{current_song_index: csi} = display) do

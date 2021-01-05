@@ -155,6 +155,7 @@ defmodule LyricScreen.Song do
 
 	require Logger
 
+	# TODO: adding fields to this may break all users' data?
 	defstruct [
 		key: nil,
 		display_title: "Song Title",
@@ -194,6 +195,8 @@ defmodule LyricScreen.Song do
 			_ -> default
 		end
 	end
+
+	def verse_at(%__MODULE__{} = song, i), do: Enum.at(map(song), i)
 
 	def map(song, map_name \\ "@default")
 	def map(%__MODULE__{verses: verses, display_title: title} = song, "@default") do

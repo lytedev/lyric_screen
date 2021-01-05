@@ -6,15 +6,15 @@ config :lyric_screen, env: Mix.env()
 git_rev =
 	case System.cmd("git", ~w{rev-parse --short HEAD}) do
 		{out, 0} -> String.trim(out)
-		{out, n} -> raise "git rev-parse exited non-zero"
-		err -> raise "git rev-parse failed"
+		{out, n} -> raise {"git rev-parse exited non-zero", n, out}
+		err -> raise {"git rev-parse failed", err}
 	end
 
 git_branch =
 	case System.cmd("git", ~w{branch --show-current}) do
 		{out, 0} -> String.trim(out)
-		{out, n} -> raise "git branch exited non-zero"
-		err -> raise "git branch failed"
+		{out, n} -> raise {"git branch exited non-zero", n, out}
+		err -> raise {"git branch failed", err}
 	end
 
 config :lyric_screen,
