@@ -2,6 +2,10 @@
 
 SaaS for managing live performance lyrics.
 
+Demo at [http://alpha.lyricscreen.com:6754](http://alpha.lyricscreen.com:6754)
+
+**NOTE**: This is a very alpha-level work-in-progress. It is possibly suitable for very basic on-premises single-user uses, but not much else.
+
 ## Setup
 
 ```bash
