@@ -4,6 +4,10 @@ SaaS for managing live performance lyrics.
 
 Demo at [http://alpha.lyricscreen.com:6754](http://alpha.lyricscreen.com:6754)
 
+![Screenshot of LyricScreen index page][ss_index]
+
+![Screenshot of LyricScreen control panel page][ss_controlpanel]
+
 **NOTE**: This is a very alpha-level work-in-progress. It is possibly suitable for very basic on-premises single-user uses, but not much else.
 
 ## Setup
@@ -42,3 +46,7 @@ MIX_ENV=prod mix release
 ```
 ./src/priv/script/deploy.sh
 ```
+
+
+[ss_index]: https://files.lyte.dev/uploads/lyric_screen_index.png
+[ss_controlpanel]: https://files.lyte.dev/uploads/lyric_screen_controlpanel.png
