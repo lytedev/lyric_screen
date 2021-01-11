@@ -1,25 +1,29 @@
-FROM elixir:1.9.0-alpine AS build
+FROM elixir:1.11-alpine AS build
 RUN apk add --no-cache build-base git
 WORKDIR /app
 RUN mix local.hex --force && mix local.rebar --force
 ENV MIX_ENV=prod
 COPY mix.exs mix.lock ./
+# TODO: release.exs technically should copy with `src`, not here
 COPY src/config src/config
 RUN mix do deps.get, deps.compile
 COPY src src
 # COPY src/rel src/rel
 RUN mix do compile, release
 
-FROM alpine:3.9 AS app
+FROM alpine:3.12 AS app
 ARG GIT_REV
 ARG GIT_BRANCH
+ARG UID=1000
+ARG USER=lyricscreen
 LABEL maintainer="Daniel Flanagan daniel@lyte.dev"
-RUN apk add --no-cache openssl ncurses-libs
+RUN apk add --no-cache openssl ncurses-libs bash
+RUN adduser --disabled-password --uid ${UID} --shell /bin/bash ${USER}
+RUN mkdir -p /opt/lyric_screen/data
 WORKDIR /opt/lyric_screen
-RUN chown nobody:nobody /opt/lyric_screen
-USER nobody:nobody
-COPY --from=build --chown=nobody:nobody /app/build/rel .
-ENV HOME=/opt/lyric_screen
+RUN chown ${USER} /opt/lyric_screen /opt/lyric_screen/data
+COPY --from=build --chown=${USER} /app/build/rel .
 ENV GIT_REV=${GIT_REV}
 ENV GIT_BRANCH=${GIT_BRANCH}
+USER ${USER}
 CMD ["bin/lyric_screen", "start"]

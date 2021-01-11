@@ -3,11 +3,11 @@ use Mix.Config
 config :lyric_screen, compiled_at: DateTime.utc_now()
 config :lyric_screen, env: Mix.env()
 
+data_dir = "src/priv/data"
 config :lyric_screen,
-	chats_dir: "src/priv/data/chats",
-	playlists_dir: "src/priv/data/playlists",
-	displays_dir: "src/priv/data/displays",
-	songs_dir: "src/priv/data/songs"
+	playlists_dir: Path.join(data_dir, "playlists"),
+	displays_dir: Path.join(data_dir, "displays"),
+	songs_dir: Path.join(data_dir, "songs")
 
 config :lyric_screen, LyricScreen.Web.Endpoint,
 	url: [host: "localhost"],
