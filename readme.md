@@ -1,5 +1,7 @@
 # Lyricscreen
 
+SaaS for managing live performance lyrics.
+
 Demo at [http://alpha.lyricscreen.com:6754](http://alpha.lyricscreen.com:6754)
 
 ![Screenshot of LyricScreen index page][ss_index]
