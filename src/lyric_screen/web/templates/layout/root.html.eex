@@ -10,6 +10,8 @@
 		<script defer type="text/javascript" src="<%= Routes.static_path(@conn, "/js/phoenix_html.js") %>"></script>
 		<script defer type="text/javascript" src="<%= Routes.static_path(@conn, "/js/phoenix_live_view.js") %>"></script>
 		<script defer type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
+		<link rel="icon" href="/images/icon.svg" />
+		<link rel="manifest" href="<%= Routes.static_path(@conn, "/manifest.webmanifest") %>" />
 	</head>
 	<body>
 		<%= @inner_content %>

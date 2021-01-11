@@ -38,15 +38,19 @@
 			<p class="text-center">
 				Find a bug? Have a feature request? Email me at <a href="mailto:daniel@lyte.dev">daniel@lyte.dev</a>
 			</p>
+			<p class="text-center">
+				Install
+			</p>
 		</div>
 	</div>
 	<span id="ls-version-info">v<%=
 		[
 			:application.get_key(:lyric_screen, :vsn) |> elem(1),
-			Application.get_env(:lyric_screen, :version_git_rev),
+			Application.get_env(:lyric_screen, :env),
 			Application.get_env(:lyric_screen, :version_git_branch),
+			Application.get_env(:lyric_screen, :version_git_rev),
 			Application.get_env(:lyric_screen, :compiled_at) |> NaiveDateTime.to_date(),
-			Application.get_env(:lyric_screen, :compiled_at) |> NaiveDateTime.truncate(:second) |> NaiveDateTime.to_time(),
+			# Application.get_env(:lyric_screen, :compiled_at) |> NaiveDateTime.truncate(:second) |> NaiveDateTime.to_time(),
 		] |> Enum.join("-")
 	%></span>
 </div>

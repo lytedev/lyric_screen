@@ -1,0 +1,25 @@
+FROM elixir:1.9.0-alpine AS build
+RUN apk add --no-cache build-base git
+WORKDIR /app
+RUN mix local.hex --force && mix local.rebar --force
+ENV MIX_ENV=prod
+COPY mix.exs mix.lock ./
+COPY src/config src/config
+RUN mix do deps.get, deps.compile
+COPY src src
+# COPY src/rel src/rel
+RUN mix do compile, release
+
+FROM alpine:3.9 AS app
+ARG GIT_REV
+ARG GIT_BRANCH
+LABEL maintainer="Daniel Flanagan daniel@lyte.dev"
+RUN apk add --no-cache openssl ncurses-libs
+WORKDIR /opt/lyric_screen
+RUN chown nobody:nobody /opt/lyric_screen
+USER nobody:nobody
+COPY --from=build --chown=nobody:nobody /app/build/rel .
+ENV HOME=/opt/lyric_screen
+ENV GIT_REV=${GIT_REV}
+ENV GIT_BRANCH=${GIT_BRANCH}
+CMD ["bin/lyric_screen", "start"]

@@ -20,6 +20,10 @@ lv_salt = System.fetch_env!("LIVE_VIEW_SALT")
 
 IO.puts("configuration, baby: #{inspect({port, host})}")
 
+config :lyric_screen,
+	version_git_rev: System.get_env("GIT_REV", "unk_git_rev"),
+	version_git_branch: System.get_env("GIT_BRANCH", "unk_git_branch")
+
 config :lyric_screen, LyricScreen.Web.Endpoint,
 	url: [
 		# scheme: "http",

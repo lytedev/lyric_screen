@@ -1,0 +1,28 @@
+{
+	"name": "LyricScreen",
+	"short_name": "LyricScreen",
+	"start_url": "/",
+	"theme_color": "#c4f",
+	"scope": "/",
+	"display": "fullscreen",
+	"background_color": "#111",
+	"description": "Manage live-performance lyrics displays",
+	"icons": [
+		{
+			"src": "/images/icon.svg",
+			"sizes": "48x48 72x72 96x96 128x128 192x192 256x256",
+			"type": "image/svg"
+		},
+		{
+			"src": "/img/icon-192.png",
+			"type": "image/png",
+			"sizes": "192x192"
+		},
+		{
+			"src": "/img/icon-512.png",
+			"type": "image/png",
+			"sizes": "512x512"
+		}
+	],
+	"related_applications": []
+}
