@@ -48,4 +48,3 @@ MIX_ENV=prod mix release
 
 [ss_index]: https://files.lyte.dev/uploads/lyric_screen_index.png
 [ss_controlpanel]: https://files.lyte.dev/uploads/lyric_screen_controlpanel.png
->>>>>>> 43f47c2e4394be4162dc1acc0432f06ba79b9b96
