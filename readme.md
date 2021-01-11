@@ -6,7 +6,7 @@ Demo at [http://alpha.lyricscreen.com:6754](http://alpha.lyricscreen.com:6754)
 
 ![Screenshot of LyricScreen control panel page][ss_controlpanel]
 
-**NOTE**: This is a very alpha-level work-in-progress. It is possibly suitable for very basic on-premises single-user uses, but not much else.
+**NOTE**: This is a very alpha-level work-in-progress. It is possibly suitable for very basic on-premises single-user uses, but not much else, but since documentation is extremely spartan, you will likely need to figure things out on your own. If you file an issue, I'll get to it!
 
 ## Setup
 
