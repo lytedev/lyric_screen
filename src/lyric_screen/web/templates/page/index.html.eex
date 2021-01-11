@@ -38,9 +38,6 @@
 			<p class="text-center">
 				Find a bug? Have a feature request? Email me at <a href="mailto:daniel@lyte.dev">daniel@lyte.dev</a>
 			</p>
-			<p class="text-center">
-				Install
-			</p>
 		</div>
 	</div>
 	<span id="ls-version-info">v<%=
