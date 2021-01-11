@@ -29,7 +29,7 @@ docker run \
 	-p 4000:4000/tcp \
 	--volume "lyric_screen_data:/opt/lyric_screen/data" \
 	--name lyric_screen \
-	lytedev/lyric_screen:latest
+	lytedev/lyric_screen:0.5.4
 # avoid using latest in production
 ```
 
