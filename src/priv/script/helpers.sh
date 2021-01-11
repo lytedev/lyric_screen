@@ -6,6 +6,8 @@ run_on_host() {
 	ssh "$REMOTE_HOST" \
 		HOST=alpha.lyricscreen.com \
 		PORT=6754 \
+		GIT_REV="$(git rev-parse --short HEAD)" \
+		GIT_BRANCH="$(git branch --show-current)" \
 		CHATS_DIR=~/ls/data/playlists \
 		PLAYLISTS_DIR=~/ls/data/playlists \
 		DISPLAYS_DIR=~/ls/data/displays \
