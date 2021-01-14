@@ -25,6 +25,10 @@
 				<li>Song deletion</li>
 				<li>Playlist, song, and display management</li>
 				<li>Image backgrounds</li>
+				<li>Pretty icon/logo</li>
+				<li>Accounts functionality</li>
+				<li>Data backend overhaul</li>
+				<li>Installable "PWA"</li>
 				<!-- Long term goals should go in the readme -->
 				<li class="st">✅ Controls for hotkey functions</li>
 				<li class="st">✅ Pause and freeze functionality</li>
@@ -36,7 +40,7 @@
 				<!-- <li>✅ None known yet!</li> -->
 			</ul>
 			<p class="text-center">
-				Find a bug? Have a feature request? Email me at <a href="mailto:daniel@lyte.dev">daniel@lyte.dev</a>
+			Find a bug? Have a feature request? Email me at <a href="mailto:daniel@lyte.dev">daniel@lyte.dev</a> or see <a href="https://github.com/lytedev/lyric_screen">the GitHub repo</a>
 			</p>
 		</div>
 	</div>

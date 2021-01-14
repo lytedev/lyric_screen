@@ -70,6 +70,51 @@ MIX_ENV=prod mix release
 ./src/priv/script/deploy.sh
 ```
 
+# Documentation & Notes
+
+## Data Structure
+
+At some point, the data needs to move beyond flat files.
+
++ **Organization**: Has one or more associated users
+	+ Users
+	+ Performances
+	+ Payment information?
++ **User**: A single user of the application. May be associated with multiple organizations by different roles.
+	+ Name
+	+ Avatar
+	+ Status (what is the user currently doing? which performance/display are they managing?)
+	+ Contact Information
+	+ Authentication Credentials
+	+ **Note**: Anonymous user support could be enabled fairly trivially using magic links
++ **Performance**: Has one or more associated displays
+	+ Name
+	+ Date/Time?
+	+ Displays
+	+ Anything else?
++ **Displays**: Encapsulate the state of a display (which song is up? which verse in that song?)
+	+ Name
+	+ Properties (show custom backgrounds, show lyrics, show chords, etc.)
+	+ Playlist
+	+ Active Song
+	+ Active Map
+	+ Active Verse
+	+ Other Display State (hidden, frozen, etc.)
++ **Playlist**: A list of songs to go through for a performance and their chosen maps.
+	+ Name
+	+ Songs
+	+ Maps
++ **Song**: A collection of verses.
+	+ Name
+	+ Metadata (album art? copyright? etc.)
+	+ Verses
++ **Map**: A specific ordering of verses for a particular song.
+	+ Song
+	+ Verses
++ **Verse**: A small (usually a few lines) of text associated with a part of a song.
+	+ Name
+	+ Content
+
 
 [ss_index]: https://files.lyte.dev/uploads/lyric_screen_index.png
 [ss_controlpanel]: https://files.lyte.dev/uploads/lyric_screen_controlpanel.png

@@ -6,5 +6,7 @@ docker build \
 	--tag lytedev/lyric_screen:latest \
 	--file src/priv/dockerfile .
 docker tag lytedev/lyric_screen:latest lytedev/lyric_screen:"$v"
+docker tag lytedev/lyric_screen:latest lytedev/lyric_screen:alpha
 docker push lytedev/lyric_screen:"$v"
+docker push lytedev/lyric_screen:alpha
 docker push lytedev/lyric_screen:latest
