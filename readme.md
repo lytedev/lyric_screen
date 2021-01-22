@@ -10,29 +10,6 @@ Demo at [http://alpha.lyricscreen.com:6754](http://alpha.lyricscreen.com:6754)
 
 **NOTE**: This is a very alpha-level work-in-progress. It is possibly suitable for very basic on-premises single-user uses, but not much else, but since documentation is extremely spartan, you will likely need to figure things out on your own. If you file an issue, I'll get to it!
 
-## On Docker Hub
-
-https://hub.docker.com/repository/docker/lytedev/lyric_screen
-
-### Example
-
-```
-export SECRET_KEY="$(mix phx.gen.secret)"
-export LIVE_VIEW_SALT="$(mix phx.gen.secret)"
-# save your secret key and salt!
-docker run \
-	--env SECRET_KEY_BASE="$SECRET_KEY" \
-	--env LIVE_VIEW_SALT="$LIVE_VIEW_SALT" \
-	--env DATA_DIR="/opt/lyric_screen/data" \
-	--env HOST="localhost" \
-	--env PORT="4000" \
-	-p 4000:4000/tcp \
-	--volume "lyric_screen_data:/opt/lyric_screen/data" \
-	--name lyric_screen \
-	lytedev/lyric_screen:0.5.4
-# avoid using latest in production
-```
-
 ## Setup
 
 ```bash
@@ -70,7 +47,30 @@ MIX_ENV=prod mix release
 ./src/priv/script/deploy.sh
 ```
 
-# Documentation & Notes
+## Docker
+
+https://hub.docker.com/repository/docker/lytedev/lyric_screen
+
+### Example Docker Usage
+
+```
+export SECRET_KEY="$(mix phx.gen.secret)"
+export LIVE_VIEW_SALT="$(mix phx.gen.secret)"
+# save your secret key and salt!
+docker run \
+	--env SECRET_KEY_BASE="$SECRET_KEY" \
+	--env LIVE_VIEW_SALT="$LIVE_VIEW_SALT" \
+	--env DATA_DIR="/opt/lyric_screen/data" \
+	--env HOST="localhost" \
+	--env PORT="4000" \
+	-p 4000:4000/tcp \
+	--volume "lyric_screen_data:/opt/lyric_screen/data" \
+	--name lyric_screen \
+	lytedev/lyric_screen:0.5.4
+# avoid using latest in production
+```
+
+# Misc. Documentation & Notes
 
 ## Data Structure
 
