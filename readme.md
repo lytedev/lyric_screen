@@ -21,8 +21,8 @@ export SECRET_KEY="$(mix phx.gen.secret)"
 export LIVE_VIEW_SALT="$(mix phx.gen.secret)"
 # save your secret key and salt!
 docker run \
-  --env SECRET_KEY_BASE="$SECRET_KEY" \
-  --env LIVE_VIEW_SALT="$LIVE_VIEW_SALT" \
+	--env SECRET_KEY_BASE="$SECRET_KEY" \
+	--env LIVE_VIEW_SALT="$LIVE_VIEW_SALT" \
 	--env DATA_DIR="/opt/lyric_screen/data" \
 	--env HOST="localhost" \
 	--env PORT="4000" \
