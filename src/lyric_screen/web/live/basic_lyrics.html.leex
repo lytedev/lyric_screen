@@ -1,10 +1,36 @@
-<div class="flex cover flex-center text-center" id="basic-lyrics"><%= @current_slide_contents %></div>
+<%= if @transitioning? do %>
+	<div class="flex cover flex-center text-center fade-out" id="basic-lyrics"><%= @previous_slide_contents %></div>
+	<div class="flex cover flex-center text-center fade-in" id="basic-lyrics"><%= @current_slide_contents %></div>
+<% else %>
+	<div class="flex cover flex-center text-center" id="basic-lyrics"><%= @current_slide_contents %></div>
+<% end %>
 
 <style>
+:root {
+	--transition_time_ms: <%= transition_time_ms() %>;
+}
+
 #basic-lyrics {
 	font-size: min(10vh, 5vw);
 	background: #000;
 	white-space: pre-wrap;
+}
+
+@keyframes fade {
+	from {opacity: 1.0;}
+	to {opacity: 1.0;}
+}
+
+.fade-out {
+	animation-name: fade;
+	animation-duration: var(--transition_time_ms);
+	animation-iteration-count: 1;
+}
+
+.fade-in {
+	animation-name: fade;
+	animation-duration: var(--transition_time_ms);
+	animation-iteration-count: 1;
 }
 </style>
 
