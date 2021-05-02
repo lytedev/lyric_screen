@@ -3,7 +3,7 @@ defmodule LyricScreen.Application do
 
 	use Application
 
-	alias LyricScreen.{Web, Playlist, Display, Song}
+	alias LyricScreen.{Web, Playlist, Display}
 
 	def start(_type, _args) do
 		[:displays_dir, :playlists_dir, :songs_dir]

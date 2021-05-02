@@ -1,7 +1,7 @@
 defmodule LyricScreen.MixProject do
 	use Mix.Project
 
-	@version "0.5.5"
+	@version "0.5.6"
 
 	@src_path "src"
 	@priv_path Path.join(@src_path, "priv")
@@ -48,7 +48,7 @@ defmodule LyricScreen.MixProject do
 	def project, do: [
 		app: :lyric_screen,
 		version: @version,
-		elixir: "~> 1.7",
+		elixir: "~> 1.11",
 		elixirc_paths: elixirc_paths(Mix.env()),
 		config_path: @config_path,
 		test_paths: [@test_path],
