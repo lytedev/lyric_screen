@@ -1,6 +1,8 @@
 defmodule LyricScreen.Web.Endpoint do
 	use Phoenix.Endpoint, otp_app: :lyric_screen
 
+	require Logger
+
 	# The session will be stored in the cookie and signed,
 	# this means its contents can be read but not tampered with.
 	# Set :encryption_salt if you would also like to encrypt it.
@@ -17,7 +19,7 @@ defmodule LyricScreen.Web.Endpoint do
 	socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
 	static_path = Application.get_env(:lyric_screen, __MODULE__)[:static_files_path]
-	IO.puts(["Static Path: ", inspect(static_path)])
+	Logger.info(["Static Path: ", inspect(static_path)])
 	plug Plug.Static,
 		at: "/",
 		from: static_path,

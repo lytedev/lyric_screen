@@ -13,6 +13,7 @@ defmodule LyricScreen.Application do
 		if !Display.File.exists?("default"), do: Display.save_to_file(%Display{key: "default"})
 
 		children = [
+			LyricScreen.Repo,
 			Web.Telemetry,
 			{Phoenix.PubSub, name: LyricScreen.PubSub},
 			Web.Endpoint
