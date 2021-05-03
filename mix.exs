@@ -19,6 +19,7 @@ defmodule LyricScreen.MixProject do
       {:phoenix, "~> 1.5.6"},
       {:phoenix_html, "~> 2.11"},
       {:phoenix_live_view, "~> 0.15.1"},
+      {:ecto_ulid, "~> 0.2.0"},
       {:ecto_sql, "~> 3.0"},
       {:postgrex, ">= 0.0.0"},
       {:floki, ">= 0.27.0", only: :test},

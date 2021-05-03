@@ -1,8 +1,8 @@
 defmodule LyricScreen.Web.PageControllerTest do
-	use LyricScreen.Web.ConnCase
+  use LyricScreen.Web.ConnCase
 
-	test "GET /", %{conn: conn} do
-		conn = get(conn, "/")
-		assert html_response(conn, 200) =~ "Welcome to LyricScreen"
-	end
+  test "GET /", %{conn: conn} do
+    conn = get(conn, "/")
+    assert html_response(conn, 200) =~ "Welcome to LyricScreen"
+  end
 end
