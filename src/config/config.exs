@@ -11,7 +11,7 @@ config :lyric_screen, LyricScreen.Web.Endpoint,
 	live_view: [signing_salt: "cmoCWK8M"],
 	static_files_path: "src/priv/static"
 
-config :lyric_screen, LyricScreen.Repo, priv: "src/priv/data"
+config :lyric_screen, LyricScreen.Repo, priv: Path.join(__DIR__, "priv/data")
 
 config :logger, level: :debug
 
@@ -61,6 +61,7 @@ end
 
 if config_env() == :test do
 	config :lyric_screen, LyricScreen.Web.Endpoint, server: false
+	config :lyric_screen, LyricScreen.Repo, pool: Ecto.Adapters.SQL.Sandbox
 	config :logger, level: :warn
 end
 
