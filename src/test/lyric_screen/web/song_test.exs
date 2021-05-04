@@ -1,6 +1,6 @@
 defmodule LyricScreen.SongParserTest do
   use ExUnit.Case, async: true
-  doctest LyricScreen.Song.File
+
   doctest LyricScreen.Song.Parser
   doctest LyricScreen.Song
 
@@ -15,10 +15,18 @@ defmodule LyricScreen.SongParserTest do
   # TODO: property tests...?
 
   describe "parser" do
-    test "does not error on whatever corpus exists - parser should be resilient to input" do
-      assert nil ==
-               LyricScreen.Song.File.all_data()
-               |> Enum.find(fn {_key, {result, _data}} -> result == :error end)
+    test "does not error on whatever corpus exists - parser should be resilient to any input" do
+      parser_results =
+        "src/priv/data/songs"
+        |> File.ls!()
+        |> Enum.map(fn file ->
+          file
+          |> File.read!()
+          |> Parser.raw_data()
+        end)
+        |> IO.inspect()
+
+      assert nil == Enum.find(parser_results, fn {_key, {result, _data}} -> result == :error end)
     end
 
     test "fails to parse empty song data" do
