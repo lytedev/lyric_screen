@@ -24,7 +24,6 @@ defmodule LyricScreen.SongParserTest do
           |> File.read!()
           |> Parser.raw_data()
         end)
-        |> IO.inspect()
 
       assert nil == Enum.find(parser_results, fn {_key, {result, _data}} -> result == :error end)
     end

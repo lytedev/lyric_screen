@@ -53,41 +53,42 @@ defmodule LyricScreen.Web.Live.ActiveSlideDisplay do
   def load_song(socket, nil), do: socket
 
   def load_song(socket, song_id) do
-    case Song.load_from_file(song_id) do
-      {:ok, song} ->
-        mapped_verses =
-          song.verses
-          |> Enum.reduce([], fn v, acc ->
-            case v do
-              %SongVerse{type: :bare} = sv ->
-                [{"", Enum.join(sv.content, "\n")} | acc]
+    # case Song.load_from_file(song_id) do
+    #   {:ok, song} ->
+    #     mapped_verses =
+    #       song.verses
+    #       |> Enum.reduce([], fn v, acc ->
+    #         case v do
+    #           %SongVerse{type: :bare} = sv ->
+    #             [{"", Enum.join(sv.content, "\n")} | acc]
 
-              %SongVerse{type: :named} = sv ->
-                [{sv.id, Enum.join(sv.content, "\n")} | acc]
+    #           %SongVerse{type: :named} = sv ->
+    #             [{sv.id, Enum.join(sv.content, "\n")} | acc]
 
-              %SongVerse{type: :ref, id: id} = sv ->
-                matching_verse =
-                  song.verses
-                  |> Enum.find(fn v -> v.id == id && v.type == :named end)
-                  |> case do
-                    %SongVerse{} = msv -> msv
-                    _ -> %SongVerse{type: :bare, id: id, content: [""]}
-                  end
+    #           %SongVerse{type: :ref, id: id} = sv ->
+    #             matching_verse =
+    #               song.verses
+    #               |> Enum.find(fn v -> v.id == id && v.type == :named end)
+    #               |> case do
+    #                 %SongVerse{} = msv -> msv
+    #                 _ -> %SongVerse{type: :bare, id: id, content: [""]}
+    #               end
 
-                [{sv.id, Enum.join(matching_verse.content, "\n")} | acc]
-            end
-          end)
-          |> Enum.reverse()
+    #             [{sv.id, Enum.join(matching_verse.content, "\n")} | acc]
+    #         end
+    #       end)
+    #       |> Enum.reverse()
 
-        slides = [{"@title", song.display_title} | mapped_verses]
+    #     slides = [{"@title", song.display_title} | mapped_verses]
 
-        socket
-        |> assign(song: song)
-        |> assign(slides: slides)
+    #     socket
+    #     |> assign(song: song)
+    #     |> assign(slides: slides)
 
-      _ ->
-        socket
-    end
+    #   _ ->
+    #     socket
+    # end
+    socket
   end
 
   def add_song_to_playlist(socket, song_id) do

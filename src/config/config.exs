@@ -1,5 +1,8 @@
 import Config
 
+app_dir = Path.dirname(__DIR__)
+data_dir = System.get_env("DATA_DIR", Path.join(app_dir, "priv/data"))
+
 config :lyric_screen, compiled_at: DateTime.utc_now()
 config :lyric_screen, env: Mix.env()
 config :lyric_screen, ecto_repos: [LyricScreen.Repo]
@@ -11,7 +14,15 @@ config :lyric_screen, LyricScreen.Web.Endpoint,
   live_view: [signing_salt: "cmoCWK8M"],
   static_files_path: "src/priv/static"
 
-config :lyric_screen, LyricScreen.Repo, migration_primary_key: [name: :id, type: :binary_id]
+migrations_path =
+  case config_env() do
+    :prod -> Path.relative_to(data_dir, app_dir)
+    _ -> Path.join("src", Path.relative_to(data_dir, app_dir))
+  end
+
+config :lyric_screen, LyricScreen.Repo,
+  priv: migrations_path,
+  migration_primary_key: [name: :id, type: :binary_id]
 
 config :logger, level: :debug
 

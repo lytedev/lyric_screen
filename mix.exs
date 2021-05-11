@@ -61,6 +61,7 @@ defmodule LyricScreen.MixProject do
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       build_path: @build_path,
+      preferred_cli_env: preferred_cli_envs(),
       deps_path: @deps_path,
       deps: deps(),
       docs: docs(),
@@ -77,7 +78,8 @@ defmodule LyricScreen.MixProject do
   defp aliases,
     do: [
       "ecto.seed": ["run src/priv/data/seed.exs"],
-      "ecto.reset": ~w{ecto.drop ecto.create ecto.migrate ecto.seed},
+      "ecto.reset.empty": ~w{ecto.drop ecto.create ecto.migrate},
+      "ecto.reset": ~w{ecto.reset.empty ecto.seed},
       "ecto.check_migration_rollback": [
         "ecto.create",
         "ecto.load --skip-if-loaded",
@@ -85,6 +87,8 @@ defmodule LyricScreen.MixProject do
         "ecto.rollback --to 20210502154902",
         "ecto.migrate"
       ],
+      "test.ecto.reset": ~w{ecto.reset.empty},
+      "test.clean": ~w{test.ecto.reset test},
       ci: [
         "credo --strict -C tests",
         fn _ -> Mix.Task.reenable("credo") end,
@@ -106,4 +110,13 @@ defmodule LyricScreen.MixProject do
     File.cp_r!(Path.join(@priv_path, "static"), d, fn _, _ -> true end)
     r
   end
+
+  defp preferred_cli_envs() do
+    Enum.flat_map(aliases(), fn {key, _tasks} ->
+      preferred_cli_env(Atom.to_string(key), key)
+    end)
+  end
+
+  defp preferred_cli_env("test." <> _rest, key), do: [{key, :test}]
+  defp preferred_cli_env(_, _), do: []
 end

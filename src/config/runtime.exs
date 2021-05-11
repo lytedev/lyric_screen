@@ -16,14 +16,7 @@ int = fn str, default ->
   end
 end
 
-migrations_path =
-  case config_env() do
-    :dev -> Path.join("src", Path.relative_to(data_dir, app_dir))
-    _ -> Path.relative_to(data_dir, app_dir)
-  end
-
 config :lyric_screen, LyricScreen.Repo,
-  priv: migrations_path,
   database: env.("DATABASE_NAME", "lyrics_#{config_env()}"),
   username: env.("DATABASE_USER", "postgres"),
   password: env.("DATABASE_PASS", "postgres"),
