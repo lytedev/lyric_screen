@@ -1,9 +1,7 @@
-defmodule LyricScreen.SongParserTest do
+defmodule LyricScreen.Song.ParserTest do
   use ExUnit.Case, async: true
 
   doctest LyricScreen.Song.Parser
-  doctest LyricScreen.Song
-
   alias LyricScreen.Song.Parser
 
   defmacrop assert_parser_raw_data_results(song_contents, pattern) do
@@ -16,16 +14,17 @@ defmodule LyricScreen.SongParserTest do
 
   describe "parser" do
     test "does not error on whatever corpus exists - parser should be resilient to any input" do
+      dir = "src/priv/data/songs"
       parser_results =
-        "src/priv/data/songs"
+        dir
         |> File.ls!()
-        |> Enum.map(fn file ->
-          file
-          |> File.read!()
-          |> Parser.raw_data()
-        end)
+        |> Enum.map(&Path.join(dir, &1))
+        |> Enum.filter(&File.exists?/1)
+        |> Enum.reject(&File.dir?/1)
+        |> Enum.map(&File.read!/1)
+        |> Enum.map(&Parser.raw_data/1)
 
-      assert nil == Enum.find(parser_results, fn {_key, {result, _data}} -> result == :error end)
+      refute Enum.any?(parser_results, &match?({_key, {:error, _data}}, &1))
     end
 
     test "fails to parse empty song data" do

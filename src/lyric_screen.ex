@@ -7,5 +7,12 @@ defmodule LyricScreen do
   if it comes from the database, an external API or others.
   """
 
-  def new_song
+  alias LyricScreen.{Song,Repo}
+
+  def new_song(opts \\ []) do
+    opts
+    |> Map.new()
+    |> Song.new()
+    |> Repo.insert()
+  end
 end

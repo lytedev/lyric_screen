@@ -8,8 +8,6 @@ defmodule LyricScreen.RepoCase do
       import Ecto
       import Ecto.Query
       import LyricScreen.RepoCase
-
-      # and any other stuff
     end
   end
 

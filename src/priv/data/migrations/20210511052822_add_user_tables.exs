@@ -1,4 +1,4 @@
-defmodule LyricScreen.Repo.Migrations.AddSongsTables do
+defmodule LyricScreen.Repo.Migrations.AddUsersTables do
   use Ecto.Migration
 
   def change do
