@@ -55,6 +55,7 @@ defmodule LyricScreen.MixProject do
       app: :lyric_screen,
       version: @version,
       elixir: "~> 1.12",
+      elixirc_options: [warnings_as_errors: true],
       elixirc_paths: elixirc_paths(Mix.env()),
       config_path: @config_path,
       test_paths: [@test_path],

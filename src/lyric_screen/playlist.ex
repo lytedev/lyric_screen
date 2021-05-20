@@ -24,33 +24,33 @@ defmodule LyricScreen.Playlist do
 
     # TODO: cast_assoc songs?
   end
-end
 
-defmodule LyricScreen.PlaylistSong do
-  @moduledoc false
+  defmodule Song do
+    @moduledoc false
 
-  use LyricScreen.Schema
+    use LyricScreen.Schema
 
-  alias LyricScreen.Playlist
-  alias LyricScreen.Song
+    alias LyricScreen.Playlist
+    alias LyricScreen.Song
 
-  schema "playlist_songs" do
-    belongs_to :playlist, Playlist
-    belongs_to :song, Song
-    field :order, :integer, default: 0
-  end
+    schema "playlist_songs" do
+      belongs_to :playlist, Playlist
+      belongs_to :song, Song
+      field :order, :integer, default: 0
+    end
 
-  @required_fields [:playlist_id, :song_id]
-  @optional_fields [:order]
+    @required_fields [:playlist_id, :song_id]
+    @optional_fields [:order]
 
-  def changeset(playlist_song \\ %__MODULE__{}, params \\ %{})
+    def changeset(playlist_song \\ %__MODULE__{}, params \\ %{})
 
-  def changeset(%__MODULE__{} = playlist_song, params) do
-    playlist_song
-    |> cast(params, @required_fields ++ @optional_fields)
-    |> validate_required(params, @required_fields)
-    |> foreign_key_constraint([:playlist_id, :song_id])
+    def changeset(%__MODULE__{} = playlist_song, params) do
+      playlist_song
+      |> cast(params, @required_fields ++ @optional_fields)
+      |> validate_required(params, @required_fields)
+      |> foreign_key_constraint([:playlist_id, :song_id])
 
-    # TODO: default should add to the end of the playlist (max current order plus 1)
+      # TODO: default should add to the end of the playlist (max current order plus 1)
+    end
   end
 end

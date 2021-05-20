@@ -33,6 +33,11 @@ config :logger, :console,
 
 config :phoenix, :json_library, Jason
 
+config :phoenix, :template_engines,
+  slim: PhoenixSlime.Engine,
+  slime: PhoenixSlime.Engine,
+  slimleex: PhoenixSlime.LiveViewEngine
+
 if config_env() == :dev do
   git_rev =
     case System.cmd("git", ~w{rev-parse --short HEAD}) do
@@ -62,7 +67,7 @@ if config_env() == :dev do
         ~r"src/priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
         ~r"src/priv/gettext/.*(po)$",
         ~r"src/lyric_screen/web/(live|views)/.*(ex)$",
-        ~r"src/lyric_screen/web/templates/.*(eex)$"
+        ~r"src/lyric_screen/web/templates/.*(eex|slim|slime|slimleex)$"
       ]
     ]
 

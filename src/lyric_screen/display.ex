@@ -1,7 +1,21 @@
 defmodule LyricScreen.Display do
-  use LyricScreen.Schema
+  @moduledoc """
+  Display context and schema
+  """
 
   alias LyricScreen.Playlist
+
+  @required_fields []
+  @optional_fields [
+    :playlist_id,
+    :song_index,
+    :slide_index,
+    :frozen_song_index,
+    :frozen_slide_index,
+    :visible
+  ]
+
+  use LyricScreen.Schema
 
   schema "displays" do
     field(:name, :string)
@@ -17,20 +31,9 @@ defmodule LyricScreen.Display do
     field(:visible, :boolean, default: true)
   end
 
-  @required_fields []
-  @optional_fields [
-    :playlist_id,
-    :song_index,
-    :slide_index,
-    :frozen_song_index,
-    :frozen_slide_index,
-    :visible
-  ]
-
   def changeset(display \\ %__MODULE__{}, params \\ %{}) do
-    display
-    |> cast(params, @required_fields ++ @optional_fields)
-    |> validate_required(params, @required_fields)
+    params
+    |> base_changeset(display)
     |> maybe_validate_playlist()
 
     # TODO: validations for song/slide indexes, must be valid (point to actual data) or nil

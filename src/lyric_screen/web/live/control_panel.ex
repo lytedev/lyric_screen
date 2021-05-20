@@ -3,7 +3,6 @@ defmodule LyricScreen.Web.Live.ControlPanel do
 
   use Phoenix.HTML
   use Phoenix.LiveView
-  alias LyricScreen.{Web.Endpoint, Display, Playlist, Song, SongVerse}
   require Logger
 
   defp songs(playlist), do: playlist.songs
@@ -99,8 +98,7 @@ defmodule LyricScreen.Web.Live.ControlPanel do
   #     err ->
   #       Logger.error(inspect(err))
   #       socket
-  #   end
-  # end
+  #   end end
 
   # def load_song(socket) do
   #   Logger.debug("Loading Current Song")
