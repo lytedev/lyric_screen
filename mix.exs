@@ -14,6 +14,7 @@ defmodule LyricScreen.MixProject do
 
   defp deps,
     do: [
+      {:ash, "~> 1.44.8"},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:phoenix, "~> 1.5.6"},

@@ -1,29 +1,14 @@
 defmodule LyricScreen.Song do
-  require Logger
+  use LyricScreen.Resource
 
-  alias LyricScreen.SongVerse
-  alias LyricScreen.SongMap
-
-  @required_fields [:name]
-  @optional_fields [:metadata]
-
-  use LyricScreen.Schema
-
-  schema "songs" do
-    field :name, :string
-    field :metadata, :map, default: %{}
-    has_many :verses, SongVerse
-    has_many :maps, SongMap
-    timestamps()
+  with_common_attributes do
+    attribute :name, :string, allow_nil?: false, constraints: [max_length: 255]
+    attribute :metadata, :map, allow_nil?: false, default: %{}
   end
 
-  def changeset(song \\ %__MODULE__{}, params \\ %{})
-
-  def changeset(%__MODULE__{} = song, params) do
-    params
-    |> base_changeset(song)
-    |> foreign_key_constraint(:song_id)
+  relationships do
+    belongs_to :user, LyricScreen.User
+    has_many :verses, LyricScreen.Verse, destination_field: :song_id
+    has_many :maps, LyricScreen.Map, destination_field: :song_id
   end
-
-  def preload_all(), do: [:verses, maps: [entries: [:verses]]]
 end
