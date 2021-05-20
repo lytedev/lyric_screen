@@ -20,7 +20,6 @@ defmodule LyricScreen.Song do
   def new(params) do
     %__MODULE__{}
     |> changeset(Map.new(params))
-    |> Repo.insert()
   end
 
   def new(params), do: changeset(%__MODULE__{}, Map.new(params))
@@ -45,7 +44,7 @@ defmodule LyricScreen.SongVerse do
   use LyricScreen.Schema
   alias LyricScreen.Song
 
-  schema "song_verses" do
+  schema "verses" do
     belongs_to :song, Song
     field :name, :string
     field :content, :string, default: ""
@@ -71,7 +70,7 @@ defmodule LyricScreen.SongMap do
   use LyricScreen.Schema
   alias LyricScreen.MapEntry
 
-  schema "song_maps" do
+  schema "maps" do
     belongs_to :song, Song
     field :name, :string
     has_many :entries, MapEntry
@@ -96,7 +95,7 @@ end
 defmodule LyricScreen.MapEntry do
   use LyricScreen.Schema
 
-  schema "song_map_entries" do
+  schema "map_verses" do
     belongs_to :verse, Song
     field :order, :integer, default: 0
     timestamps()

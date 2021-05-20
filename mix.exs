@@ -77,6 +77,7 @@ defmodule LyricScreen.MixProject do
 
   defp aliases,
     do: [
+      r: ~w{phx.server},
       "ecto.seed": ["run src/priv/data/seed.exs"],
       "ecto.reset.empty": ~w{ecto.drop ecto.create ecto.migrate},
       "ecto.reset": ~w{ecto.reset.empty ecto.seed},

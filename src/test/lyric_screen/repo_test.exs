@@ -2,6 +2,7 @@ defmodule LyricScreen.RepoTest do
   use LyricScreen.RepoCase, async: true
 
   alias LyricScreen.Song
+  alias LyricScreen.Repo
 
   describe "repo" do
     test "can select 1" do
@@ -9,13 +10,13 @@ defmodule LyricScreen.RepoTest do
     end
 
     test "can insert and get a song" do
-      song = LyricScreen.new_song(name: "My Song") |> IO.inspect()
+      {:ok, song} = LyricScreen.new_song(name: "My Song") |> IO.inspect()
       assert %Song{} = Repo.get(Song, song.id)
     end
 
     test "can insert and get a complex, nested song" do
-      song = LyricScreen.new_song(name: "My Song") |> IO.inspect()
-      assert %Song{} = Song |> Repo.preload(Song.preload_all())
+      {:ok, song} = LyricScreen.new_song(name: "My Song") |> IO.inspect()
+      assert %Song{} = Repo.preload(song, Song.preload_all())
     end
   end
 end
