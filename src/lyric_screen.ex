@@ -7,7 +7,8 @@ defmodule LyricScreen do
   if it comes from the database, an external API or others.
   """
 
-  alias LyricScreen.{Song,Repo}
+  alias LyricScreen.Repo
+  alias LyricScreen.Song
 
   def new_song(opts \\ []) do
     opts
