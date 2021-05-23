@@ -20,8 +20,9 @@ defmodule LyricScreen.MixProject do
       {:phoenix, "~> 1.5.6"},
       {:phoenix_html, "~> 2.11"},
       {:phoenix_live_view, "~> 0.15.1"},
+      {:phoenix_slime, "~> 0.13.1"},
       {:ecto_ulid, "~> 0.2.0"},
-      {:ecto_sql, "~> 3.0"},
+      {:ash_postgres, "~> 0.38.11"},
       {:postgrex, ">= 0.0.0"},
       {:floki, ">= 0.27.0", only: :test},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
@@ -32,6 +33,7 @@ defmodule LyricScreen.MixProject do
       {:jason, "~> 1.0"},
       {:nimble_parsec, "~> 1.1"},
       {:file_system, "~> 0.2.1 or ~> 0.3"},
+      {:uuid, "~> 1.1"},
       {:plug_cowboy, "~> 2.0"}
     ]
 

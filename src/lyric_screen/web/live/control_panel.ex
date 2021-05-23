@@ -5,10 +5,6 @@ defmodule LyricScreen.Web.Live.ControlPanel do
   use Phoenix.LiveView
   require Logger
 
-  defp songs(playlist), do: playlist.songs
-  defp current_song?(display, index), do: display.current_song_index == index
-  defp current_slide?(display, index), do: display.current_slide_index == index
-
   def mount(_params, session, socket) do
     Logger.warn(session)
 

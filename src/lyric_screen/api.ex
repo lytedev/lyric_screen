@@ -4,5 +4,6 @@ defmodule LyricScreen.Api do
   resources do
     resource LyricScreen.User
     resource LyricScreen.Song
+    resource LyricScreen.Display
   end
 end

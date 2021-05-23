@@ -6,14 +6,4 @@ defmodule LyricScreen do
   Contexts are also responsible for managing your data, regardless
   if it comes from the database, an external API or others.
   """
-
-  alias LyricScreen.Repo
-  alias LyricScreen.Song
-
-  def new_song(opts \\ []) do
-    opts
-    |> Map.new()
-    |> Song.new()
-    |> Repo.insert()
-  end
 end
