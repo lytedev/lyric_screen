@@ -79,52 +79,57 @@ defmodule LyricScreen.MixProject do
       extra_applications: [:logger, :runtime_tools, :os_mon]
     ]
 
-    defp aliases do
-      generated_migrations_path = Path.join(@priv_path, "data/generated_migrations")
-      full_generated_migrations_path = Path.join(generated_migrations_path, "repo/migrations")
-      resource_snapshots_path = Path.join(@priv_path, "data/resource_snapshots")
-      [
-        "db.gen.migrations": ["ash_postgres.generate_migrations --snapshot-path #{resource_snapshots_path} --migration-path #{generated_migrations_path}"],
-        "rmdir.generated_migrations": ["rmdir #{generated_migrations_path}"],
-        "rmdir.resource_snapshots": ["rmdir #{resource_snapshots_path}"],
-        "db.gen.migrations.clean": [
-          "rmdir.resource_snapshots",
-          fn _ -> Mix.Task.reenable("rmdir") end,
-          "rmdir.generated_migrations",
-          "db.gen.migrations",
-        ],
-        "db.generated_migrations": ["ecto.migrate --migrations-path #{full_generated_migrations_path}"],
-        r: ~w{phx.server},
-        "db.drop": ~w{ecto.drop},
-        "db.create": ~w{ecto.create},
-        "db.migrate": [
-          "db.gen.migrations.clean",
-          "ecto.migrate",
-          fn _ -> Mix.Task.reenable("ecto.migrate") end,
-          "db.generated_migrations",
-        ],
-        "db.seed": ["run #{@priv_path}/data/seed.exs"],
-        "db.reset.empty": ~w{db.drop db.create db.migrate},
-        "db.reset": ~w{db.reset.empty db.seed},
-        "db.check_migration_rollback": [
-          "db.create",
-          "ecto.load --skip-if-loaded",
-          "db.migrate",
-          "ecto.rollback --to 20210502154902",
-          "db.migrate"
-        ],
-        "test.db.reset": ~w{db.reset.empty},
-        "test.clean": ~w{test.db.reset test},
-        ci: [
-          "credo --strict -C tests",
-          fn _ -> Mix.Task.reenable("credo") end,
-          "credo --strict",
-          "format --check-formatted",
-          "dialyzer",
-          "db.check_migration_rollback"
-        ]
+  defp aliases do
+    generated_migrations_path = Path.join(@priv_path, "data/generated_migrations")
+    full_generated_migrations_path = Path.join(generated_migrations_path, "repo/migrations")
+    resource_snapshots_path = Path.join(@priv_path, "data/resource_snapshots")
+
+    [
+      "db.gen.migrations": [
+        "ash_postgres.generate_migrations --snapshot-path #{resource_snapshots_path} --migration-path #{generated_migrations_path}"
+      ],
+      "rmdir.generated_migrations": ["rmdir #{generated_migrations_path}"],
+      "rmdir.resource_snapshots": ["rmdir #{resource_snapshots_path}"],
+      "db.gen.migrations.clean": [
+        "rmdir.resource_snapshots",
+        fn _ -> Mix.Task.reenable("rmdir") end,
+        "rmdir.generated_migrations",
+        "db.gen.migrations"
+      ],
+      "db.generated_migrations": [
+        "ecto.migrate --migrations-path #{full_generated_migrations_path}"
+      ],
+      r: ~w{phx.server},
+      "db.drop": ~w{ecto.drop},
+      "db.create": ~w{ecto.create},
+      "db.migrate": [
+        "db.gen.migrations.clean",
+        "ecto.migrate",
+        fn _ -> Mix.Task.reenable("ecto.migrate") end,
+        "db.generated_migrations"
+      ],
+      "db.seed": ["run #{@priv_path}/data/seed.exs"],
+      "db.reset.empty": ~w{db.drop db.create db.migrate},
+      "db.reset": ~w{db.reset.empty db.seed},
+      "db.check_migration_rollback": [
+        "db.create",
+        "ecto.load --skip-if-loaded",
+        "db.migrate",
+        "ecto.rollback --to 20210502154902",
+        "db.migrate"
+      ],
+      "test.db.reset": ~w{db.reset.empty},
+      "test.clean": ~w{test.db.reset test},
+      ci: [
+        "credo --strict -C tests",
+        fn _ -> Mix.Task.reenable("credo") end,
+        "credo --strict",
+        "format --check-formatted",
+        "dialyzer",
+        "db.check_migration_rollback"
       ]
-    end
+    ]
+  end
 
   defp elixirc_paths(:test), do: elixirc_paths(nil) ++ [Path.join(@test_path, "support")]
   defp elixirc_paths(_), do: [@src_path]

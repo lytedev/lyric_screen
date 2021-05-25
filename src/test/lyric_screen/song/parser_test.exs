@@ -15,6 +15,7 @@ defmodule LyricScreen.Song.ParserTest do
   describe "parser" do
     test "does not error on whatever corpus exists - parser should be resilient to any input" do
       dir = "src/priv/data/raw/songs"
+
       if File.exists?(dir) do
         parser_results =
           dir

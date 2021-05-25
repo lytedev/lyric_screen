@@ -11,7 +11,7 @@ defmodule LyricScreen.Resource do
   defmacro postgres_table(name) do
     quote do
       postgres do
-        repo LyricScreen.Repo
+        repo(LyricScreen.Repo)
         table unquote(name)
       end
     end

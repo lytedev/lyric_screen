@@ -9,7 +9,7 @@ defmodule LyricScreen.Song do
   default_actions()
 
   attributes do
-    ulid_primary_key :id
+    ulid_primary_key(:id)
     attribute :name, :string, allow_nil?: false, constraints: [max_length: 255]
     attribute :metadata, :map, allow_nil?: false, default: %{}
     create_timestamp :inserted_at
