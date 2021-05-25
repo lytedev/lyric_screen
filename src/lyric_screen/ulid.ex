@@ -5,11 +5,11 @@ defmodule LyricScreen.Ash.Type.ULID do
 	def storage_type, do: :uuid
 
 	@impl Ash.Type
-	def cast_input(value, _), do: Ecto.Type.cast(:uuid, value)
+	def cast_input(value, _), do: Ecto.Type.cast(Ecto.UUID, value)
 
 	@impl Ash.Type
-	def cast_stored(value, _), do: Ecto.Type.load(:uuid, value)
+	def cast_stored(value, _), do: Ecto.Type.load(Ecto.UUID, value)
 
 	@impl Ash.Type
-	def dump_to_native(value, _), do: Ecto.Type.dump(:uuid, value)
+	def dump_to_native(value, _), do: Ecto.Type.dump(Ecto.UUID, value)
 end

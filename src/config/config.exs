@@ -6,6 +6,7 @@ data_dir = System.get_env("DATA_DIR", Path.join(app_dir, "priv/data"))
 config :lyric_screen, compiled_at: DateTime.utc_now()
 config :lyric_screen, env: Mix.env()
 config :lyric_screen, ecto_repos: [LyricScreen.Repo]
+config :lyric_screen, ash_apis: [LyricScreen.Api]
 
 config :lyric_screen, LyricScreen.Web.Endpoint,
   secret_key_base: "vqQv2ePi+neCxN9s7bwj508kWY06T7y4mijCyBrCz+xyXV/ozuHOMsSeNZ7OljJ9",

@@ -5,6 +5,9 @@ defmodule LyricScreen.Song do
 
   use LyricScreen.Resource
 
+  postgres_table("songs")
+  default_actions()
+
   attributes do
     ulid_primary_key :id
     attribute :name, :string, allow_nil?: false, constraints: [max_length: 255]

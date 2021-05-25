@@ -14,17 +14,19 @@ defmodule LyricScreen.Song.ParserTest do
 
   describe "parser" do
     test "does not error on whatever corpus exists - parser should be resilient to any input" do
-      dir = "src/priv/data/songs"
-      parser_results =
-        dir
-        |> File.ls!()
-        |> Enum.map(&Path.join(dir, &1))
-        |> Enum.filter(&File.exists?/1)
-        |> Enum.reject(&File.dir?/1)
-        |> Enum.map(&File.read!/1)
-        |> Enum.map(&Parser.raw_data/1)
+      dir = "src/priv/data/raw/songs"
+      if File.exists?(dir) do
+        parser_results =
+          dir
+          |> File.ls!()
+          |> Enum.map(&Path.join(dir, &1))
+          |> Enum.filter(&File.exists?/1)
+          |> Enum.reject(&File.dir?/1)
+          |> Enum.map(&File.read!/1)
+          |> Enum.map(&Parser.raw_data/1)
 
-      refute Enum.any?(parser_results, &match?({_key, {:error, _data}}, &1))
+        refute Enum.any?(parser_results, &match?({_key, {:error, _data}}, &1))
+      end
     end
 
     test "fails to parse empty song data" do

@@ -1,17 +1,8 @@
 defmodule LyricScreen.User do
-  use LyricScreen.Resource, data_layer: AshPostgres.DataLayer
+  use LyricScreen.Resource
 
-  postgres do
-    repo LyricScreen.Repo
-    table "users"
-  end
-
-  actions do
-    create :create
-    read :read
-    update :update
-    destroy :destroy
-  end
+  postgres_table("users")
+  default_actions()
 
   attributes do
     ulid_primary_key :id

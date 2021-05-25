@@ -2,6 +2,9 @@ defmodule LyricScreen.RepoTest do
   use LyricScreen.RepoCase, async: true
 
   alias LyricScreen.Song
+  alias LyricScreen.User
+  alias LyricScreen.Api
+  alias Ash.Changeset
   alias LyricScreen.Repo
 
   describe "repo" do
@@ -9,14 +12,9 @@ defmodule LyricScreen.RepoTest do
       assert %Postgrex.Result{rows: [[1]]} = Repo.query!("select 1")
     end
 
-    test "can insert and get a song" do
-      {:ok, song} = LyricScreen.new_song(name: "My Song") |> IO.inspect()
-      assert %Song{} = Repo.get(Song, song.id)
-    end
-
-    test "can insert and get a complex, nested song" do
-      {:ok, song} = LyricScreen.new_song(name: "My Song") |> IO.inspect()
-      assert %Song{} = Repo.preload(song, Song.preload_all())
+    test "can insert and get a user" do
+      {:ok, song} = Api.create(Changeset.new(User, %{name: "user"}))
+      assert %User{name: "user"} = Repo.get(User, song.id)
     end
   end
 end

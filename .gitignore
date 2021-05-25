@@ -1,5 +1,8 @@
 /build
 erl_crash.dump
 /src/config/*.secret.exs
-/src/priv/data/playlists
-/src/priv/data/displays
+/src/priv/data/raw
+/src/priv/data/generated_migrations
+/src/priv/data/resource_snapshots
+/priv
+*.log
