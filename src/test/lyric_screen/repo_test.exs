@@ -1,10 +1,9 @@
 defmodule LyricScreen.RepoTest do
   use LyricScreen.RepoCase, async: true
 
-  alias LyricScreen.Song
+  alias Ash.Changeset
   alias LyricScreen.User
   alias LyricScreen.Api
-  alias Ash.Changeset
   alias LyricScreen.Repo
 
   describe "repo" do
