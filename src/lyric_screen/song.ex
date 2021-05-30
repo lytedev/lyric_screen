@@ -17,8 +17,8 @@ defmodule LyricScreen.Song do
   end
 
   relationships do
-    # belongs_to :user, LyricScreen.User
-    # has_many :verses, LyricScreen.Verse, destination_field: :song_id
-    # has_many :maps, LyricScreen.Map, destination_field: :song_id
+    belongs_to :user, LyricScreen.User
+    has_many :verses, LyricScreen.Verse, destination_field: :song_id
+    has_many :maps, LyricScreen.Map, destination_field: :song_id
   end
 end
